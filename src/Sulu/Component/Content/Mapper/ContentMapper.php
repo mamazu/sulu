@@ -618,6 +618,7 @@ class ContentMapper implements ContentMapperInterface
      * Return the content document (aka the home page).
      *
      * @param string $webspaceKey
+     * @param string|null $locale
      *
      * @return BasePageDocument|SnippetDocument
      */
@@ -682,11 +683,11 @@ class ContentMapper implements ContentMapperInterface
      */
     private function rowToArray(
         Row $row,
-        $locale,
-        $webspaceKey,
-        $fields,
-        $onlyPublished = true,
-        $permission = null
+        ?string $locale,
+        string $webspaceKey,
+        array $fields,
+        bool $onlyPublished = true,
+        ?array $permission = null
     ) {
         // reset cache
         $this->initializeExtensionCache();
@@ -827,10 +828,10 @@ class ContentMapper implements ContentMapperInterface
         Row $row,
         NodeInterface $node,
         $document,
-        $fields,
-        $templateKey,
-        $webspaceKey,
-        $locale
+        array $fields,
+        string $templateKey,
+        string $webspaceKey,
+        ?string $locale
     ) {
         $fieldsData = [];
         foreach ($fields as $field) {
@@ -868,8 +869,15 @@ class ContentMapper implements ContentMapperInterface
     /**
      * Return data for one field.
      */
-    private function getFieldData($field, Row $row, NodeInterface $node, $document, $templateKey, $webspaceKey, $locale)
-    {
+    private function getFieldData(
+        array $field, 
+        Row $row, 
+        NodeInterface $node, 
+        $document, 
+        string $templateKey, 
+        string $webspaceKey, 
+        $locale
+    ) {
         if (isset($field['column'])) {
             // normal data from node property
             return $row->getValue($field['column']);
@@ -906,8 +914,8 @@ class ContentMapper implements ContentMapperInterface
     private function getExtensionData(
         NodeInterface $node,
         ExtensionInterface $extension,
-        $propertyName,
-        $webspaceKey,
+        string $propertyName,
+        string $webspaceKey,
         $locale
     ) {
         // extension data: load ones
@@ -932,7 +940,7 @@ class ContentMapper implements ContentMapperInterface
     /**
      * load data from extension.
      */
-    private function loadExtensionData(NodeInterface $node, ExtensionInterface $extension, $webspaceKey, $locale)
+    private function loadExtensionData(NodeInterface $node, ExtensionInterface $extension, string $webspaceKey, $locale)
     {
         $extension->setLanguageCode($locale, $this->namespaceRegistry->getPrefix('extension_localized'), '');
         $data = $extension->load(
@@ -944,7 +952,7 @@ class ContentMapper implements ContentMapperInterface
         return $extension->getContentData($data);
     }
 
-    private function loadDocument($pathOrUuid, $locale, $options, $shouldExclude = true)
+    private function loadDocument($pathOrUuid, ?string $locale, array $options, bool $shouldExclude = true)
     {
         $document = $this->documentManager->find(
             $pathOrUuid,
@@ -961,7 +969,7 @@ class ContentMapper implements ContentMapperInterface
         return $document;
     }
 
-    private function optionsShouldExcludeDocument($document, ?array $options = null)
+    private function optionsShouldExcludeDocument($document, ?array $options = null): bool
     {
         if (null === $options) {
             return false;
@@ -991,7 +999,7 @@ class ContentMapper implements ContentMapperInterface
     /**
      * Initializes cache of extension data.
      */
-    private function initializeExtensionCache()
+    private function initializeExtensionCache(): void
     {
         $this->extensionDataCache = new ArrayCache();
     }
