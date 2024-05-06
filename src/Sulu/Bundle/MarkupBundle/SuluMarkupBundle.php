@@ -31,7 +31,6 @@ class SuluMarkupBundle extends Bundle
     {
         parent::build($container);
 
-        $container->addCompilerPass(new ParserCompilerPass());
         $container->addCompilerPass(new TagCompilerPass());
         $container->addCompilerPass(
             new TaggedServiceCollectorCompilerPass(
