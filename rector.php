@@ -43,5 +43,5 @@ return RectorConfig::configure()
         // LevelSetList::UP_TO_PHP_80,
     ])
     ->withRules([
-        StaticDataProviderClassMethodRector::class, // prepare for PHPUnit >= 10
+        \Rector\TypeDeclaration\Rector\StmtsAwareInterface\DeclareStrictTypesRector::class,
     ]);

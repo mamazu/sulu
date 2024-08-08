@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of Sulu.
  *
@@ -8,7 +10,6 @@
  * This source file is subject to the MIT license that is bundled
  * with this source code in the file LICENSE.
  */
-
 namespace Sulu\Bundle\CoreBundle\DependencyInjection\Compiler;
 
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
@@ -28,7 +29,7 @@ class CsvHandlerCompilerPass implements CompilerPassInterface
                 return;
             }
 
-            $id = $container->getAlias($id);
+            $id = (string) $container->getAlias($id);
         }
 
         $definition = $container->getDefinition($id);

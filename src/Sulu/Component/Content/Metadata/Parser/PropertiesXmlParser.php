@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of Sulu.
  *
@@ -8,7 +10,6 @@
  * This source file is subject to the MIT license that is bundled
  * with this source code in the file LICENSE.
  */
-
 namespace Sulu\Component\Content\Metadata\Parser;
 
 use Sulu\Component\Content\Exception\InvalidDefaultTypeException;
@@ -211,7 +212,7 @@ class PropertiesXmlParser
             ));
         }
 
-        if ($result['ref']) {
+        if (!!$result['ref']) {
             $result['name'] = $result['ref'];
             $result['ref'] = true;
         }
