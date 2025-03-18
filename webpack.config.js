@@ -1,4 +1,3 @@
-/* eslint-disable flowtype/require-valid-file-annotation */
 /* eslint-disable import/no-nodejs-modules */
 /* eslint-disable import/no-dynamic-require */
 const fs = require('fs');

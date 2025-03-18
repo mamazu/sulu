@@ -1,4 +1,3 @@
-/* eslint-disable flowtype/require-valid-file-annotation */
 import {shallow} from 'enzyme';
 import React from 'react';
 import debounce from 'debounce';

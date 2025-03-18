@@ -1,4 +1,3 @@
-/* eslint-disable flowtype/require-valid-file-annotation */
 import {mount, render} from 'enzyme';
 import mockReact from 'react';
 import {findWithHighOrderFunction} from '../../../utils/TestHelper';

@@ -1,4 +1,3 @@
-/* eslint-disable flowtype/require-valid-file-annotation */
 import {mount} from 'enzyme';
 import React from 'react';
 import {ImageRectangleSelection} from '../ImageRectangleSelection';

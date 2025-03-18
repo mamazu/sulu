@@ -1,0 +1,105 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const react_1 = __importDefault(require("react"));
+const enzyme_1 = require("enzyme");
+const SingleAutoComplete_1 = __importDefault(require("../SingleAutoComplete"));
+jest.mock('debounce', () => jest.fn((callback) => callback));
+test('SingleAutoComplete should render with suggestions', () => {
+    const suggestions = [
+        { id: 1, name: 'Suggestion 1' },
+        { id: 2, name: 'Suggestion 2' },
+        { id: 3, name: 'Suggestion 3' },
+    ];
+    const singleAutoComplete = (0, enzyme_1.mount)(<SingleAutoComplete_1.default displayProperty="name" onChange={jest.fn()} onFinish={jest.fn()} onSearch={jest.fn()} searchProperties={['name']} suggestions={suggestions} value={{ name: 'Test' }}/>);
+    // suggestions are displayed when input field is focused
+    singleAutoComplete.find('Input').prop('onFocus')();
+    singleAutoComplete.update();
+    expect(singleAutoComplete.render()).toMatchSnapshot();
+    expect(singleAutoComplete.find('AutoCompletePopover').render()).toMatchSnapshot();
+});
+test('SingleAutoComplete should be disabled when in disabled state', () => {
+    const suggestions = [
+        { name: 'Suggestion 1' },
+        { name: 'Suggestion 2' },
+        { name: 'Suggestion 3' },
+    ];
+    const singleAutoComplete = (0, enzyme_1.mount)(<SingleAutoComplete_1.default disabled={true} displayProperty="name" onChange={jest.fn()} onFinish={jest.fn()} onSearch={jest.fn()} searchProperties={['name']} suggestions={suggestions} value={{ name: 'Test' }}/>);
+    expect(singleAutoComplete.find('input').prop('disabled')).toEqual(true);
+});
+test('Selecting suggestion should fire onChange callback and update value of Input with selected value', () => {
+    const changeSpy = jest.fn();
+    const suggestions = [
+        { id: 1, name: 'Suggestion 1' },
+        { id: 2, name: 'Suggestion 2' },
+        { id: 3, name: 'Suggestion 3' },
+    ];
+    const singleAutoComplete = (0, enzyme_1.mount)(<SingleAutoComplete_1.default displayProperty="name" onChange={changeSpy} onFinish={jest.fn()} onSearch={jest.fn()} searchProperties={['name']} suggestions={suggestions} value={{ name: 'Test' }}/>);
+    expect(singleAutoComplete.find('Input').prop('value')).toEqual('Test');
+    // suggestions are displayed when input field is focused
+    singleAutoComplete.find('Input').prop('onFocus')();
+    singleAutoComplete.update();
+    singleAutoComplete.find('Suggestion button').at(0).simulate('click');
+    expect(singleAutoComplete.find('Input').prop('value')).toEqual('Suggestion 1');
+    expect(changeSpy).toHaveBeenCalledWith(suggestions[0]);
+});
+test('Should call onChange with undefined if all characters are removed from input', () => {
+    const changeSpy = jest.fn();
+    const suggestions = [
+        { id: 1, name: 'Suggestion 1' },
+        { id: 2, name: 'Suggestion 2' },
+        { id: 3, name: 'Suggestion 3' },
+    ];
+    const singleAutoComplete = (0, enzyme_1.shallow)(<SingleAutoComplete_1.default displayProperty="name" onChange={changeSpy} onFinish={jest.fn()} onSearch={jest.fn()} searchProperties={['name']} suggestions={suggestions} value={{ name: 'Test' }}/>);
+    expect(singleAutoComplete.find('Input').prop('value')).toEqual('Test');
+    singleAutoComplete.find('Input').simulate('change', '');
+    expect(changeSpy).toBeCalledWith(undefined);
+});
+test('Should call the onFinish callback when the Input lost focus', () => {
+    const finishSpy = jest.fn();
+    const suggestions = [
+        { id: 1, name: 'Suggestion 1' },
+    ];
+    const singleAutoComplete = (0, enzyme_1.shallow)(<SingleAutoComplete_1.default displayProperty="name" onChange={jest.fn()} onFinish={finishSpy} onSearch={jest.fn()} searchProperties={['name']} suggestions={suggestions} value={{ name: 'Test' }}/>);
+    singleAutoComplete.find('Input').simulate('blur');
+    expect(finishSpy).toBeCalledWith();
+});
+test('Should update value of Input when the value prop is updated', () => {
+    const finishSpy = jest.fn();
+    const suggestions = [
+        { id: 1, name: 'Suggestion 1' },
+    ];
+    const singleAutoComplete = (0, enzyme_1.shallow)(<SingleAutoComplete_1.default displayProperty="name" onChange={jest.fn()} onFinish={finishSpy} onSearch={jest.fn()} searchProperties={['name']} suggestions={suggestions} value={{ name: 'Test' }}/>);
+    expect(singleAutoComplete.find('Input').prop('value')).toEqual('Test');
+    singleAutoComplete.setProps({ value: { name: 'new value' } });
+    expect(singleAutoComplete.find('Input').prop('value')).toEqual('new value');
+});
+test('Should fire onSearch callback and open popover when input field is focused', () => {
+    const searchSpy = jest.fn();
+    const suggestions = [
+        { id: 1, name: 'Suggestion 1' },
+    ];
+    const singleAutoComplete = (0, enzyme_1.shallow)(<SingleAutoComplete_1.default displayProperty="name" onChange={jest.fn()} onFinish={jest.fn()} onSearch={searchSpy} searchProperties={['name']} suggestions={suggestions} value={{ name: 'Test' }}/>);
+    expect(searchSpy).not.toBeCalled();
+    expect(singleAutoComplete.find('AutoCompletePopover').prop('open')).toEqual(false);
+    singleAutoComplete.find('Input').prop('onFocus')();
+    expect(searchSpy).toBeCalledWith('Test');
+    expect(singleAutoComplete.find('AutoCompletePopover').prop('open')).toEqual(true);
+});
+test('Should close popover when requested and reopen popover when input field is changed', () => {
+    const searchSpy = jest.fn();
+    const suggestions = [
+        { id: 1, name: 'Suggestion 1' },
+    ];
+    const singleAutoComplete = (0, enzyme_1.shallow)(<SingleAutoComplete_1.default displayProperty="name" onChange={jest.fn()} onFinish={jest.fn()} onSearch={searchSpy} searchProperties={['name']} suggestions={suggestions} value={{ name: 'Test' }}/>);
+    singleAutoComplete.find('Input').prop('onFocus')();
+    expect(searchSpy).nthCalledWith(1, 'Test');
+    expect(singleAutoComplete.find('AutoCompletePopover').prop('open')).toEqual(true);
+    singleAutoComplete.find('AutoCompletePopover').prop('onClose')();
+    expect(singleAutoComplete.find('AutoCompletePopover').prop('open')).toEqual(false);
+    singleAutoComplete.find('Input').prop('onChange')('search term');
+    expect(searchSpy).nthCalledWith(2, 'search term');
+    expect(singleAutoComplete.find('AutoCompletePopover').prop('open')).toEqual(true);
+});

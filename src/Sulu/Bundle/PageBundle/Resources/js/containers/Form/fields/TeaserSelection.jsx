@@ -1,0 +1,153 @@
+"use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __runInitializers = (this && this.__runInitializers) || function (thisArg, initializers, value) {
+    var useValue = arguments.length > 2;
+    for (var i = 0; i < initializers.length; i++) {
+        value = useValue ? initializers[i].call(thisArg, value) : initializers[i].call(thisArg);
+    }
+    return useValue ? value : void 0;
+};
+var __esDecorate = (this && this.__esDecorate) || function (ctor, descriptorIn, decorators, contextIn, initializers, extraInitializers) {
+    function accept(f) { if (f !== void 0 && typeof f !== "function") throw new TypeError("Function expected"); return f; }
+    var kind = contextIn.kind, key = kind === "getter" ? "get" : kind === "setter" ? "set" : "value";
+    var target = !descriptorIn && ctor ? contextIn["static"] ? ctor : ctor.prototype : null;
+    var descriptor = descriptorIn || (target ? Object.getOwnPropertyDescriptor(target, contextIn.name) : {});
+    var _, done = false;
+    for (var i = decorators.length - 1; i >= 0; i--) {
+        var context = {};
+        for (var p in contextIn) context[p] = p === "access" ? {} : contextIn[p];
+        for (var p in contextIn.access) context.access[p] = contextIn.access[p];
+        context.addInitializer = function (f) { if (done) throw new TypeError("Cannot add initializers after decoration has completed"); extraInitializers.push(accept(f || null)); };
+        var result = (0, decorators[i])(kind === "accessor" ? { get: descriptor.get, set: descriptor.set } : descriptor[key], context);
+        if (kind === "accessor") {
+            if (result === void 0) continue;
+            if (result === null || typeof result !== "object") throw new TypeError("Object expected");
+            if (_ = accept(result.get)) descriptor.get = _;
+            if (_ = accept(result.set)) descriptor.set = _;
+            if (_ = accept(result.init)) initializers.unshift(_);
+        }
+        else if (_ = accept(result)) {
+            if (kind === "field") initializers.unshift(_);
+            else descriptor[key] = _;
+        }
+    }
+    if (target) Object.defineProperty(target, contextIn.name, descriptor);
+    done = true;
+};
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+var __setFunctionName = (this && this.__setFunctionName) || function (f, name, prefix) {
+    if (typeof name === "symbol") name = name.description ? "[".concat(name.description, "]") : "";
+    return Object.defineProperty(f, "name", { configurable: true, value: prefix ? "".concat(prefix, " ", name) : name });
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const react_1 = __importDefault(require("react"));
+const mobx_1 = require("mobx");
+const mobx_react_1 = require("mobx-react");
+const json_pointer_1 = __importDefault(require("json-pointer"));
+const stores_1 = require("sulu-admin-bundle/stores");
+const TeaserSelection_1 = __importStar(require("../../TeaserSelection"));
+let TeaserSelection = (() => {
+    let _classDecorators = [mobx_react_1.observer];
+    let _classDescriptor;
+    let _classExtraInitializers = [];
+    let _classThis;
+    let _classSuper = react_1.default.Component;
+    let _instanceExtraInitializers = [];
+    let _get_locale_decorators;
+    var TeaserSelection = _classThis = class extends _classSuper {
+        constructor() {
+            super(...arguments);
+            this.handleItemClick = (__runInitializers(this, _instanceExtraInitializers), (itemId, item) => {
+                if (!item) {
+                    return;
+                }
+                const { router } = this.props;
+                const { resultToView, view } = TeaserSelection_1.teaserProviderRegistry.get(item.type);
+                if (!router || !resultToView || !view) {
+                    return;
+                }
+                router.navigate(view, Object.keys(resultToView).reduce((parameters, resultPath) => {
+                    parameters[resultToView[resultPath]] = json_pointer_1.default.get(item, '/' + resultPath);
+                    return parameters;
+                }, {}));
+            });
+            this.handleTeaserSelectionChange = (value) => {
+                const { onChange, onFinish } = this.props;
+                onChange(value);
+                onFinish();
+            };
+        }
+        get locale() {
+            const { formInspector } = this.props;
+            return formInspector.locale ? formInspector.locale : mobx_1.observable.box(stores_1.userStore.contentLocale);
+        }
+        render() {
+            const { disabled, schemaOptions = {}, value } = this.props;
+            const { present_as: { value: presentAs = [], } = {}, } = schemaOptions;
+            if (!(0, mobx_1.isArrayLike)(presentAs)) {
+                throw new Error('The "present_as" schemaOption must be an array, but received ' + typeof presentAs + '!');
+            }
+            const presentations = presentAs.map((presentation) => {
+                const { name, title } = presentation;
+                if (!name) {
+                    throw new Error('Every presentation in the "present_as" schema Option must contain a name');
+                }
+                if (!title) {
+                    throw new Error('Every presentation in the "present_as" schema Option must contain a title');
+                }
+                return {
+                    label: title.toString(),
+                    value: name.toString(),
+                };
+            });
+            return (<TeaserSelection_1.default disabled={disabled === null ? undefined : disabled} locale={this.locale} onChange={this.handleTeaserSelectionChange} onItemClick={this.handleItemClick} presentations={presentations.length > 0 ? presentations : undefined} value={value === null ? undefined : value}/>);
+        }
+    };
+    __setFunctionName(_classThis, "TeaserSelection");
+    (() => {
+        var _a;
+        const _metadata = typeof Symbol === "function" && Symbol.metadata ? Object.create((_a = _classSuper[Symbol.metadata]) !== null && _a !== void 0 ? _a : null) : void 0;
+        _get_locale_decorators = [mobx_1.computed];
+        __esDecorate(_classThis, null, _get_locale_decorators, { kind: "getter", name: "locale", static: false, private: false, access: { has: obj => "locale" in obj, get: obj => obj.locale }, metadata: _metadata }, null, _instanceExtraInitializers);
+        __esDecorate(null, _classDescriptor = { value: _classThis }, _classDecorators, { kind: "class", name: _classThis.name, metadata: _metadata }, null, _classExtraInitializers);
+        TeaserSelection = _classThis = _classDescriptor.value;
+        if (_metadata) Object.defineProperty(_classThis, Symbol.metadata, { enumerable: true, configurable: true, writable: true, value: _metadata });
+        __runInitializers(_classThis, _classExtraInitializers);
+    })();
+    return TeaserSelection = _classThis;
+})();
+exports.default = TeaserSelection;

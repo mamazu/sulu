@@ -11,7 +11,6 @@
     "extends": [
         "eslint:recommended",
         "plugin:react/recommended",
-        "plugin:flowtype/recommended",
         "plugin:testing-library/react",
         "plugin:jest-dom/recommended"
     ],
@@ -27,13 +26,11 @@
         "babel",
         "import",
         "react",
-        "flowtype",
         "jsx-a11y"
     ],
     "settings": {
         "react": {
             "version": "detect",
-            "flowVersion": "0.142.0"
         },
         "testing-library/utils-module": "off"
     },
@@ -214,27 +211,6 @@
             "multiline-multiprop"
         ],
         "react/prop-types": "off",
-        "flowtype/require-valid-file-annotation": [
-            "error",
-            "always",
-            {
-                "annotationStyle": "line"
-            }
-        ],
-        "flowtype/space-after-type-colon": [
-            "error",
-            "always"
-        ],
-        "flowtype/object-type-delimiter": [
-            "error",
-            "comma"
-        ],
-        "flowtype/no-dupe-keys": "error",
-        "flowtype/delimiter-dangle": [
-            "error",
-            "always-multiline"
-        ],
-        "flowtype/sort-keys": "error",
         "babel/semi": "error",
         "jsx-a11y/no-static-element-interactions": "error",
         "react/button-has-type": "error",

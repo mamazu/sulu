@@ -1,4 +1,3 @@
-/* eslint-disable flowtype/require-valid-file-annotation */
 import {mount, render, shallow} from 'enzyme';
 import React from 'react';
 import ModifiableRectangle from '../ModifiableRectangle';
