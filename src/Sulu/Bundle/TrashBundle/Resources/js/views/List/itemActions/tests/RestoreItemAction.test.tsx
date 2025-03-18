@@ -7,6 +7,7 @@ import List from 'sulu-admin-bundle/views/List';
 import Dialog from 'sulu-admin-bundle/components/Dialog';
 import {ResourceRequester} from 'sulu-admin-bundle/services';
 import RestoreItemAction from '../../itemActions/RestoreItemAction';
+import { createHashHistory, createMemoryHistory } from 'history';
 
 const React = mockReact;
 
@@ -43,7 +44,7 @@ jest.mock('../../../../containers/RestoreFormOverlay', () => (class RestoreFormO
 }));
 
 function createItemAction(options = {}) {
-    const router = new Router({});
+    const router = new Router(createMemoryHistory());
     const listStore = new ListStore(
         'list-resource-key',
         'list-key',

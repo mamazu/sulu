@@ -2,7 +2,7 @@ import {action, autorun, computed, isArrayLike, observable, toJS} from 'mobx';
 import equal from 'fast-deep-equal';
 import log from 'loglevel';
 import {compile} from 'path-to-regexp';
-import {parsePath} from 'history';
+import {History, parsePath} from 'history';
 import {transformDateForUrl} from '../../utils/Date';
 import routeRegistry from './registries/routeRegistry';
 import resourceViewRegistry from './registries/resourceViewRegistry';
@@ -120,13 +120,10 @@ function addAttributesFromSearchParameters(attributes: any, value: string, key: 
 }
 
 export default class Router {
-    history: any;
-    @observable
-    route: Route;
-    @observable
-    attributes: AttributeMap = {};
-    @observable
-    bindings: Map<string, IObservableValue<any>> = new Map();
+    history: History;
+    @observable route: Route;
+    @observable attributes: AttributeMap = {};
+    @observable bindings: Map<string, IObservableValue<any>> = new Map();
     bindingDefaults: Map<string, string | null | undefined | number | boolean> = new Map();
     attributesHistory: {
         [key: string]: Array<AttributeMap>
@@ -137,7 +134,7 @@ export default class Router {
     updateAttributesHooks: Array<UpdateAttributesHook> = [];
     redirectFlag: boolean = false;
 
-    constructor(history: any) {
+    constructor(history: History) {
         this.history = history;
 
         this.history.listen(({location}) => {

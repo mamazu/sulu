@@ -4,6 +4,7 @@ import Form from 'sulu-admin-bundle/views/Form/Form';
 import {ResourceFormStore} from 'sulu-admin-bundle/containers/Form';
 import {ResourceRequester} from 'sulu-admin-bundle/services';
 import EnableUserToolbarAction from '../../toolbarActions/EnableUserToolbarAction';
+import { createMemoryHistory } from 'history';
 
 jest.mock('sulu-admin-bundle/utils/Translator', () => ({
     translate: jest.fn((key: any) => key),
@@ -58,7 +59,7 @@ jest.mock('sulu-admin-bundle/services', () => ({
 function createEnableUserToolbarAction() {
     const resourceStore = new ResourceStore('test');
     const resourceFormStore = new ResourceFormStore(resourceStore, 'test');
-    const router = new Router({});
+    const router = new Router(createMemoryHistory());
     const form = new Form({
         locales: [],
         resourceStore,

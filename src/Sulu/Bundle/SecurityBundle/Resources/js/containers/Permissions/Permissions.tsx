@@ -8,6 +8,7 @@ import permissionsStyle from './permissions.scss';
 import PermissionMatrix from './PermissionMatrix';
 import type {SecurityContextGroups, SecurityContexts} from '../../stores/securityContextStore/types';
 import type {ContextPermission} from './types';
+import { Actions } from '../../stores/securityContextStore/types.ts';
 
 type Props = {
     disabled: boolean,
@@ -26,8 +27,7 @@ class Permissions extends React.Component<Props> {
 
     systemDisposer: () => void;
 
-    @observable
-    securityContextGroups: SecurityContextGroups;
+    @observable securityContextGroups: SecurityContextGroups;
 
     @action componentDidMount() {
         this.systemDisposer = autorun(
@@ -107,7 +107,7 @@ class Permissions extends React.Component<Props> {
 
         const webspaceSecurityContextGroup = this.securityContextGroups[this.webspaceSecurityContextGroupKey];
 
-        const securityContexts: Record<string, any> = {};
+        const securityContexts: Record<string, Actions> = {};
 
         Object.keys(webspaceSecurityContextGroup).sort().map((securityContextKey) => {
             securityContexts[securityContextKey.replace(Permissions.webspacePlaceholder, webspace)]
