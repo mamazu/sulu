@@ -1,0 +1,19 @@
+import log from 'loglevel';
+import type {ReactNode} from 'react';
+import type {FieldTransformer} from '../types';
+
+export default class NumberFieldTransformer implements FieldTransformer {
+    transform(value: any): Node {
+        if (!value) {
+            return null;
+        }
+
+        if (isNaN(value)) {
+            log.error('Invalid number given: "' + value + '"');
+
+            return null;
+        }
+
+        return value.toLocaleString();
+    }
+}

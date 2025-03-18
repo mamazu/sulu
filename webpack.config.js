@@ -36,7 +36,7 @@ module.exports = (env, argv) => { // eslint-disable-line no-undef
     const {styles} = require(path.resolve(nodeModulesPath, '@ckeditor/ckeditor5-dev-utils'));
 
     return {
-        entry: [path.resolve(__dirname, 'index.js')], // eslint-disable-line no-undef
+        entry: [path.resolve(__dirname, 'index.ts')], // eslint-disable-line no-undef
         output: {
             clean: true,
             path: path.resolve(projectRootPath, publicDir, outputPath),
@@ -101,6 +101,11 @@ module.exports = (env, argv) => { // eslint-disable-line no-undef
                             cacheCompression: false,
                         },
                     },
+                },
+                {
+                    test: /\.ts$/,
+                    use: 'ts-loader',
+                    exclude: /node_modules/,
                 },
                 {
                     test: /\.css/,

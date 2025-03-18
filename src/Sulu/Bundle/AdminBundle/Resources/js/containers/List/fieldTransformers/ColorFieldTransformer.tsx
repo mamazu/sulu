@@ -1,0 +1,24 @@
+import React from 'react';
+import log from 'loglevel';
+import colorFieldTransformerStyles from './colorFieldTransformer.scss';
+import type {ReactNode} from 'react';
+import type {FieldTransformer} from '../types';
+
+export default class ColorFieldTransformer implements FieldTransformer {
+    transform(value: any): Node {
+        if (!value) {
+            return null;
+        }
+
+        if (!/^#[0-9a-f]{3}([0-9a-f]{3})?$/i.test(value)) {
+            log.error(`Invalid color given: "${value}". Format needs to be "#RGB" or "#RRGGBB".`);
+
+            return null;
+        }
+
+        const style: Record<string, any> = {};
+        style.backgroundColor = value;
+
+        return <div className={colorFieldTransformerStyles.colorBox} style={style} />;
+    }
+}

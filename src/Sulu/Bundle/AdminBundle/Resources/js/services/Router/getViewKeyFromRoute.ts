@@ -1,0 +1,20 @@
+import Route from './Route';
+import type {AttributeMap} from './types';
+
+export default function getViewKeyFromRoute(route?: Route | null, attributes?: AttributeMap | null) {
+    if (!route) {
+        return null;
+    }
+
+    const rerenderAttributeValues = [];
+
+    if (route.rerenderAttributes) {
+        route.rerenderAttributes.forEach((rerenderAttribute) => {
+            if (attributes && attributes.hasOwnProperty(rerenderAttribute)) {
+                rerenderAttributeValues.push(attributes[rerenderAttribute]);
+            }
+        });
+    }
+
+    return route.name + (rerenderAttributeValues.length > 0 ? '-' + rerenderAttributeValues.join('__') : '');
+}

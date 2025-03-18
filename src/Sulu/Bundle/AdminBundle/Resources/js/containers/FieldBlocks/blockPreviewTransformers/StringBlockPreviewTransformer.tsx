@@ -1,0 +1,19 @@
+import React from 'react';
+import type {ReactNode} from 'react';
+import type {BlockPreviewTransformer} from '../types';
+
+const MAX_LENGTH = 50;
+
+export default class StringBlockPreviewTransformer implements BlockPreviewTransformer {
+    transform(value: any): Node {
+        if (typeof value === 'number') {
+            value = String(value);
+        }
+
+        if (typeof value !== 'string') {
+            return null;
+        }
+
+        return <p>{value.length > MAX_LENGTH ? value.substring(0, MAX_LENGTH) + '...' : value}</p>;
+    }
+}

@@ -1,0 +1,43 @@
+import type {ElementRef} from 'react';
+
+export type InputProps<T extends string | null | undefined | number | null | undefined> = {
+    alignment?: 'left' | 'center' | 'right',
+    autocomplete?: string,
+    autoFocus?: boolean,
+    collapsed?: boolean,
+    disabled: boolean,
+    headline?: boolean,
+    icon?: string,
+    iconClassName?: string,
+    iconStyle?: any,
+    id?: string,
+    inputClass?: string,
+    inputContainerRef?: (ref?: ElementRef<any> | null | undefined) => void,
+    inputMode?: string,
+    inputRef?: (ref?: ElementRef<'input'> | null | undefined) => void,
+    loading?: boolean,
+    max?: T | null | undefined,
+    maxCharacters?: number,
+    maxSegments?: number,
+    min?: T | null | undefined,
+    name?: string,
+    onBlur?: () => void,
+    onChange: (
+        value: string | null | undefined,
+        event: React.SyntheticEvent<HTMLInputElement>,
+    ) => void,
+    onClearClick?: () => void,
+    onFocus?: (event: Event) => void,
+    onIconClick?: () => void,
+    onKeyPress?: (
+        key: string | null | undefined,
+        event: React.KeyboardEvent<HTMLInputElement>,
+    ) => void,
+    placeholder?: string,
+    segmentDelimiter?: string,
+    skin?: 'default' | 'dark',
+    step?: T | null | undefined,
+    type?: string,
+    valid: boolean,
+    value: T | null | undefined
+};
