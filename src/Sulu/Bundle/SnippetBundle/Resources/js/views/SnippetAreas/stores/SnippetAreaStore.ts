@@ -1,6 +1,6 @@
 import {action, observable} from 'mobx';
 import {ResourceRequester} from 'sulu-admin-bundle/services';
-import type {SnippetArea} from '../types';
+import type {SnippetArea} from '../types.d.ts';
 
 export default class SnippetAreaStore {
     @observable
@@ -18,8 +18,9 @@ export default class SnippetAreaStore {
     constructor(webspaceKey: string) {
         this.webspaceKey = webspaceKey;
 
-        ResourceRequester.getList('snippet_areas', {webspace: webspaceKey}).then(action((response) => {
-            this.snippetAreas = response._embedded.areas.reduce<Record<string, any>>((snippetAreas, snippetArea) => {
+        ResourceRequester.getList('snippet_areas', {webspace: webspaceKey})
+            .then(action((response) => {
+            this.snippetAreas = response._embedded.areas.reduce<Record<string, any>>((snippetAreas: SnippetArea, snippetArea) => {
                 snippetAreas[snippetArea.key] = snippetArea;
 
                 return snippetAreas;
@@ -32,7 +33,7 @@ export default class SnippetAreaStore {
         this.saving = true;
 
         return ResourceRequester.put('snippet_areas', {defaultUuid}, {key: areaKey, webspace: this.webspaceKey})
-            .then(action((response) => {
+            .then(action((response: SnippetArea) => {
                 this.snippetAreas[areaKey] = response;
                 this.saving = false;
             }));
@@ -42,7 +43,7 @@ export default class SnippetAreaStore {
         this.deleting = true;
 
         return ResourceRequester.delete('snippet_areas', {key: areaKey, webspace: this.webspaceKey})
-            .then(action((response) => {
+            .then(action((response: SnippetArea) => {
                 this.snippetAreas[areaKey] = response;
                 this.deleting = false;
             }));

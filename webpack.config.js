@@ -102,9 +102,11 @@ module.exports = (env, argv) => { // eslint-disable-line no-undef
                     },
                 },
                 {
-                    test: /\.ts$/,
+                    test: /\.(ts|tsx)$/,
                     use: 'ts-loader',
-                    exclude: /node_modules/,
+                    exclude: [
+                        /node_modules/,
+                    ]
                 },
                 {
                     test: /\.css/,
