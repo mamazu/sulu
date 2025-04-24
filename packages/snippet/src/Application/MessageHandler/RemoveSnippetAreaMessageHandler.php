@@ -13,37 +13,24 @@ declare(strict_types=1);
 
 namespace Sulu\Snippet\Application\MessageHandler;
 
-use Sulu\Bundle\ActivityBundle\Application\Collector\DomainEventCollectorInterface;
+use Doctrine\ORM\EntityManagerInterface;
 use Sulu\Snippet\Application\Message\RemoveSnippetAreaMessage;
-use Sulu\Snippet\Domain\Event\SnippetAreaRemovedEvent;
-use Sulu\Snippet\Domain\Model\SnippetAreaInterface;
-use Sulu\Snippet\Domain\Repository\SnippetAreaRepositoryInterface;
+use Sulu\Snippet\Domain\Model\SnippetArea;
 
-readonly class RemoveSnippetAreaMessageHandler
+class RemoveSnippetAreaMessageHandler
 {
-    public function __construct(
-        private SnippetAreaRepositoryInterface $snippetAreaRepository,
-        private DomainEventCollectorInterface $domainEventCollector
-    ) {
+    public function __construct(private EntityManagerInterface $entityManager)
+    {
     }
 
-    public function __invoke(RemoveSnippetAreaMessage $message): ?SnippetAreaInterface
+    public function __invoke(RemoveSnippetAreaMessage $message): void
     {
-        $snippetArea = $this->snippetAreaRepository->findOneBy([
+        $snippetRepository = $this->entityManager->getRepository(SnippetArea::class);
+        $entityToDelete = $snippetRepository->findOneBy([
             'webspaceKey' => $message->getWebspaceKey(),
             'areaKey' => $message->getAreaKey(),
         ]);
 
-        if (null === $snippetArea) {
-            return null;
-        }
-
-        $this->snippetAreaRepository->remove($snippetArea);
-
-        $snippetArea->setSnippet(null);
-
-        $this->domainEventCollector->collect(new SnippetAreaRemovedEvent($snippetArea->getUuid(), $snippetArea->getAreaKey(), $message->getData()));
-
-        return $snippetArea;
+        $this->entityManager->remove($snippetRepository);
     }
 }

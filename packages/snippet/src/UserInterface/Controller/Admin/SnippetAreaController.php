@@ -11,21 +11,20 @@
 
 namespace Sulu\Snippet\UserInterface\Controller\Admin;
 
-use Sulu\Component\Rest\ListBuilder\CollectionRepresentation;
 use Sulu\Component\Rest\ListBuilder\Doctrine\DoctrineListBuilder;
 use Sulu\Component\Rest\ListBuilder\Doctrine\DoctrineListBuilderFactoryInterface;
 use Sulu\Component\Rest\ListBuilder\Doctrine\FieldDescriptor\DoctrineFieldDescriptorInterface;
 use Sulu\Component\Rest\ListBuilder\Metadata\FieldDescriptorFactoryInterface;
+use Sulu\Component\Rest\ListBuilder\PaginatedRepresentation;
 use Sulu\Component\Rest\RestHelperInterface;
-use Sulu\Component\Security\Authorization\PermissionTypes;
-use Sulu\Component\Security\Authorization\SecurityCheckerInterface;
-use Sulu\Component\Security\Authorization\SecurityCondition;
+use Sulu\Content\Application\ContentManager\ContentManagerInterface;
 use Sulu\Messenger\Infrastructure\Symfony\Messenger\FlushMiddleware\EnableFlushStamp;
-use Sulu\Snippet\Application\Message\ModifySnippetAreaMessage;
 use Sulu\Snippet\Application\Message\RemoveSnippetAreaMessage;
+use Sulu\Snippet\Application\Message\SetSnippetMessage;
 use Sulu\Snippet\Domain\Model\SnippetAreaInterface;
-use Sulu\Snippet\Infrastructure\Sulu\Admin\SnippetAreaAdmin;
-use Sulu\Snippet\Infrastructure\Symfony\CompilerPass\SnippetAreaCompilerPass;
+use Sulu\Snippet\Domain\Model\SnippetInterface;
+use Sulu\Snippet\Domain\Repository\SnippetRepositoryInterface;
+use Sulu\Snippet\Infrastructure\Doctrine\Repository\SnippetAreaRepository;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -38,168 +37,65 @@ use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
  * @internal this class should not be instated by a project
  *           Use instead a request or response listener to
  *           extend the endpoints behaviours
- *
- * @phpstan-import-type SnippetAreaConfig from SnippetAreaCompilerPass
  */
 final class SnippetAreaController
 {
     use HandleTrait;
 
-    /**
-     * @param SnippetAreaConfig $snippetAreas
-     */
     public function __construct(
-        MessageBusInterface $messageBus,
+        private SnippetAreaRepository $snippetAreaRepository,
+        private MessageBusInterface $messageBus,
         private NormalizerInterface $normalizer,
         private FieldDescriptorFactoryInterface $fieldDescriptorFactory,
         private DoctrineListBuilderFactoryInterface $listBuilderFactory,
-        private RestHelperInterface $restHelper,
-        protected SecurityCheckerInterface $securityChecker,
-        private array $snippetAreas,
+        private RestHelperInterface $restHelper
     ) {
-        $this->messageBus = $messageBus;
     }
 
     public function cgetAction(Request $request): Response
     {
-        $webspaceKey = $request->query->getString('webspaceKey');
-        $this->securityChecker->checkPermission(
-            new SecurityCondition(SnippetAreaAdmin::getSecurityContext($webspaceKey)),
-            PermissionTypes::VIEW,
-        );
-
         /** @var DoctrineFieldDescriptorInterface[] $fieldDescriptors */
-        $fieldDescriptors = $this->fieldDescriptorFactory->getFieldDescriptors(SnippetAreaInterface::RESOURCE_KEY);
+        $fieldDescriptors = $this->fieldDescriptorFactory->getFieldDescriptors(SnippetInterface::RESOURCE_KEY);
 
         /** @var DoctrineListBuilder $listBuilder */
-        $listBuilder = $this->listBuilderFactory->create(SnippetAreaInterface::class);
-        $listBuilder->setIdField($fieldDescriptors['id']);
-        $listBuilder->addSelectField($fieldDescriptors['snippetUuid']);
-        $listBuilder->addSelectField($fieldDescriptors['snippetTitle']);
-        $listBuilder->setParameter('locale', $this->getLocale($request));
+        $listBuilder = $this->listBuilderFactory->create(SnippetInterface::class);
+        $listBuilder->setIdField($fieldDescriptors['id']); // TODO should be uuid field descriptor
+        $listBuilder->setParameter('locale', $request->query->get('locale'));
 
         $this->restHelper->initializeListBuilder($listBuilder, $fieldDescriptors);
 
-        if ($webspaceKey) {
-            $listBuilder->where($fieldDescriptors['webspaceKey'], $webspaceKey);
-        }
-
-        $result = $listBuilder->execute();
-
-        $snippetAreas = [];
-        foreach ($result as $row) {
-            if (\is_array($row) && isset($row['areaKey'])) {
-                /** @var string $areaKey */
-                $areaKey = $row['areaKey'];
-                $snippetAreas[$areaKey] = $row;
-            }
-        }
-
-        // Add the empty snippet areas as placeholders
-        foreach ($this->snippetAreas as $key => $snippetArea) {
-            $existingData = $snippetAreas[$key] ?? [];
-            $snippetAreas[$key] =
-                \array_merge(
-                    [
-                        'key' => $key,
-                        'snippetTitle' => null,
-                        'snippetUuid' => null,
-                        'templateKey' => $snippetArea['template'],
-                        'title' => $snippetArea['title'][$this->getLocale($request)],
-                    ],
-                    $existingData
-                );
-        }
-
-        $listRepresentation = new CollectionRepresentation(
-            \array_values($snippetAreas),
+        $listRepresentation = new PaginatedRepresentation(
+            $listBuilder->execute(),
             SnippetAreaInterface::RESOURCE_KEY,
+            (int) $listBuilder->getCurrentPage(),
+            (int) $listBuilder->getLimit(),
+            $listBuilder->count(),
         );
 
         return new JsonResponse($this->normalizer->normalize(
             $listRepresentation->toArray(),
             'json',
-            [
-                'locale' => $this->getLocale($request),
-                'sulu_admin' => true,
-                'sulu_admin_snippet' => true,
-                'sulu_admin_snippet_list' => true,
-            ],
+            ['sulu_admin' => true, 'sulu_admin_snippet' => true, 'sulu_admin_snippet_list' => true],
         ));
     }
 
-    public function putAction(Request $request, string $key): Response
+    public function putAction(Request $request): Response
     {
-        $webspaceKey = $request->query->getString('webspaceKey');
-        $this->securityChecker->checkPermission(
-            new SecurityCondition(SnippetAreaAdmin::getSecurityContext($webspaceKey)),
-            PermissionTypes::EDIT,
-        );
+        $message = new SetSnippetMessage($request->attributes->all());
 
-        $locale = $this->getLocale($request);
-        $snippetUuid = $request->request->get('snippetUuid');
-        if (!\is_string($snippetUuid)) {
-            throw new \InvalidArgumentException('snippetUuid must be a string.');
-        }
+        /** @see Sulu\Snippet\Application\MessageHandler\SetSnippetAreaMessageHandler */
+        $this->handle(new Envelope($message, [new EnableFlushStamp()]));
 
-        $data = [
-            'webspaceKey' => $webspaceKey,
-            'snippetIdentifier' => ['uuid' => $snippetUuid],
-            'areaKey' => $key,
-            'locale' => $locale,
-        ];
-        $message = new ModifySnippetAreaMessage($data);
-
-        /** @see \Sulu\Snippet\Application\MessageHandler\ModifySnippetAreaMessageHandler */
-        $updatedSnippetArea = $this->handle(new Envelope($message, [new EnableFlushStamp()]));
-
-        return new JsonResponse($this->normalizer->normalize(
-            $updatedSnippetArea,
-            'json',
-            [
-                'locale' => $this->getLocale($request),
-                'sulu_admin' => true,
-                'sulu_admin_snippet' => true,
-            ],
-        ));
+        return new Response(null, Response::HTTP_OK);
     }
 
-    public function deleteAction(Request $request, string $key): Response
+    public function deleteAction(Request $request): Response
     {
-        $webspaceKey = $request->query->getString('webspaceKey');
-        $this->securityChecker->checkPermission(
-            new SecurityCondition(SnippetAreaAdmin::getSecurityContext($webspaceKey)),
-            PermissionTypes::EDIT,
-        );
+        $message = new RemoveSnippetAreaMessage($request->attributes->all());
 
-        $data = [
-            'webspaceKey' => $webspaceKey,
-            'areaKey' => $key,
-            'locale' => $this->getLocale($request),
-        ];
-        $message = new RemoveSnippetAreaMessage($data);
+        /** @see Sulu\Snippet\Application\MessageHandler\RemoveSnippetAreaMessageHandler */
+        $this->handle(new Envelope($message, [new EnableFlushStamp()]));
 
-        /** @see \Sulu\Snippet\Application\MessageHandler\RemoveSnippetAreaMessageHandler */
-        $deletedSnippetArea = $this->handle(new Envelope($message, [new EnableFlushStamp()]));
-
-        return new JsonResponse($this->normalizer->normalize(
-            $deletedSnippetArea,
-            'json',
-            [
-                'locale' => $this->getLocale($request),
-                'sulu_admin' => true,
-                'sulu_admin_snippet' => true,
-            ],
-        ));
-    }
-
-    private function getLocale(Request $request): string
-    {
-        $locale = $request->query->get('locale');
-        if (\is_string($locale)) {
-            return $locale;
-        }
-
-        return $request->getLocale();
+        return new Response(null, Response::HTTP_NO_CONTENT);
     }
 }

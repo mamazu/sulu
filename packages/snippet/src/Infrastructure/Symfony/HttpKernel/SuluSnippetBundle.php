@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace Sulu\Snippet\Infrastructure\Symfony\HttpKernel;
 
-use Sulu\Bundle\HttpCacheBundle\ReferenceStore\ReferenceStore;
+use Doctrine\ORM\EntityManagerInterface;
 use Sulu\Bundle\PersistenceBundle\DependencyInjection\PersistenceExtensionTrait;
 use Sulu\Bundle\PersistenceBundle\PersistenceBundleTrait;
 use Sulu\Snippet\Application\Mapper\SnippetContentMapper;
@@ -50,18 +50,9 @@ use Sulu\Snippet\Infrastructure\Sulu\Admin\SnippetAreaAdmin;
 use Sulu\Snippet\Infrastructure\Sulu\Content\PropertyResolver\SingleSnippetSelectionPropertyResolver;
 use Sulu\Snippet\Infrastructure\Sulu\Content\PropertyResolver\SnippetSelectionPropertyResolver;
 use Sulu\Snippet\Infrastructure\Sulu\Content\ResourceLoader\SnippetResourceLoader;
-use Sulu\Snippet\Infrastructure\Sulu\Content\SmartResolver\SnippetAreaSmartResolver;
-use Sulu\Snippet\Infrastructure\Sulu\Content\SnippetSmartContentProvider;
-use Sulu\Snippet\Infrastructure\Sulu\HttpCache\EventSubscriber\SnippetAreaCacheInvalidationSubscriber;
-use Sulu\Snippet\Infrastructure\Sulu\HttpCache\EventSubscriber\SnippetCacheInvalidationSubscriber;
-use Sulu\Snippet\Infrastructure\Sulu\Reference\SnippetReferenceRefresher;
-use Sulu\Snippet\Infrastructure\Sulu\Search\AdminSnippetIndexListener;
-use Sulu\Snippet\Infrastructure\Sulu\Search\AdminSnippetReindexProvider;
-use Sulu\Snippet\Infrastructure\Sulu\Search\Visitor\AdminSnippetReindexProviderEnhancerInterface;
-use Sulu\Snippet\Infrastructure\Sulu\Trash\SnippetTrashItemHandler;
-use Sulu\Snippet\Infrastructure\Symfony\CompilerPass\SnippetAreaCompilerPass;
-use Sulu\Snippet\Infrastructure\Symfony\Normalizer\SnippetAreaNormalizer;
-use Sulu\Snippet\Infrastructure\Symfony\Twig\SnippetAreaTwigExtension;
+use Sulu\Snippet\Infrastructure\Sulu\Content\SingleSnippetSelectionContentType;
+use Sulu\Snippet\Infrastructure\Sulu\Content\SnippetDataProvider;
+use Sulu\Snippet\Infrastructure\Sulu\Content\SnippetSelectionContentType;
 use Sulu\Snippet\UserInterface\Controller\Admin\SnippetAreaController;
 use Sulu\Snippet\UserInterface\Controller\Admin\SnippetController;
 use Symfony\Component\Config\Definition\Configurator\DefinitionConfigurator;
@@ -214,6 +205,21 @@ final class SuluSnippetBundle extends AbstractBundle
             ])
             ->tag('messenger.message_handler');
 
+        // Snippet area
+        $services->set('sulu_snippet.modify_snippet_area_handler')
+            ->class(ModifySnippetMessageHandler::class)
+            ->args([
+                new Reference('sulu_snippet.snippet_area_repository'),
+            ])
+            ->tag('messenger.message_handler');
+
+        $services->set('sulu_snippet.remove_snippet_area_handler')
+            ->class(RemoveSnippetAreaMessageHandler::class)
+            ->args([
+                new Reference(EntityManagerInterface::class),
+            ])
+            ->tag('messenger.message_handler');
+
         // Mapper service
         $services->set('sulu_snippet.snippet_content_mapper')
             ->class(SnippetContentMapper::class)
@@ -240,39 +246,19 @@ final class SuluSnippetBundle extends AbstractBundle
             ->args([
                 new Reference('sulu_admin.view_builder_factory'),
                 new Reference('sulu_security.security_checker'),
-                new Reference('sulu_core.webspace.webspace_manager'),
             ])
             ->tag('sulu.context', ['context' => 'admin'])
             ->tag('sulu.admin');
 
-        $services->set('sulu_snippet.template_select_provider')
-            ->class(SnippetTemplateSelectProvider::class)
-            ->public()
+        // Repositories services
+        $services->set('sulu_snippet.snippet_area_repository')
+            ->class(SnippetAreaRepository::class)
             ->args([
-                new Reference('sulu_admin.form_metadata_provider'),
+                new Reference('doctrine.orm.entity_manager'),
             ]);
 
-        $services->set('sulu_snippet.snippet_area_normalizer', SnippetAreaNormalizer::class)
-            ->args([
-                new Reference('serializer.normalizer.object'),
-                param(SnippetAreaCompilerPass::SNIPPET_AREA_PARAM),
-            ])
-            ->tag('serializer.normalizer');
+        $services->alias(SnippetRepositoryInterface::class, 'sulu_snippet.snippet_area_repository');
 
-        // Twig services
-        $services->set('sulu_snippet.snippet_area_twig_extension')
-            ->class(SnippetAreaTwigExtension::class)
-            ->args([
-                new Reference('sulu_snippet.snippet_area_repository'),
-                new Reference('sulu_snippet.snippet_repository'),
-                new Reference('sulu_content.content_aggregator'),
-                new Reference('sulu_core.webspace.request_analyzer'),
-                new Reference('sulu_snippet.snippet_reference_store'),
-                new Reference('sulu_content.content_resolver'),
-            ])
-            ->tag('twig.extension');
-
-        // Repositories services
         $services->set('sulu_snippet.snippet_repository')
             ->class(SnippetRepository::class)
             ->args([
@@ -316,13 +302,13 @@ final class SuluSnippetBundle extends AbstractBundle
             ->class(SnippetAreaController::class)
             ->public()
             ->args([
+                new Reference('sulu_snippet.snippet_area_repository'),
                 new Reference('sulu_message_bus'),
                 new Reference('serializer'),
+                // additional services to be removed when no longer needed
                 new Reference('sulu_core.list_builder.field_descriptor_factory'),
                 new Reference('sulu_core.doctrine_list_builder_factory'),
                 new Reference('sulu_core.doctrine_rest_helper'),
-                new Reference('sulu_security.security_checker'),
-                param(SnippetAreaCompilerPass::SNIPPET_AREA_PARAM),
             ])
             ->tag('sulu.context', ['context' => 'admin']);
 
@@ -474,18 +460,11 @@ final class SuluSnippetBundle extends AbstractBundle
                                 'detail' => 'sulu_snippet.get_snippet',
                             ],
                         ],
-                        'snippets_versions' => [
-                            'routes' => [
-                                'list' => 'sulu_snippet.get_snippet_versions',
-                                'detail' => 'sulu_snippet.get_snippet',
-                            ],
-                        ],
                         'snippet_areas' => [
                             'routes' => [
-                                'detail' => 'sulu_snippet_area.put_snippet_area',
                                 'list' => 'sulu_snippet_area.get_snippet_areas',
-                            ],
-                        ],
+                            ]
+                        ]
                     ],
                     'field_type_options' => [
                         'selection' => [

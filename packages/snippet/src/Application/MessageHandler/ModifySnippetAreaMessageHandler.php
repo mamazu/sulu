@@ -13,39 +13,6 @@ declare(strict_types=1);
 
 namespace Sulu\Snippet\Application\MessageHandler;
 
-use Sulu\Bundle\ActivityBundle\Application\Collector\DomainEventCollectorInterface;
-use Sulu\Snippet\Application\Message\ModifySnippetAreaMessage;
-use Sulu\Snippet\Domain\Event\SnippetAreaModifiedEvent;
-use Sulu\Snippet\Domain\Model\SnippetAreaInterface;
-use Sulu\Snippet\Domain\Repository\SnippetAreaRepositoryInterface;
-use Sulu\Snippet\Domain\Repository\SnippetRepositoryInterface;
-
-readonly class ModifySnippetAreaMessageHandler
+class ModifySnippetAreaMessageHandler
 {
-    public function __construct(
-        private SnippetAreaRepositoryInterface $snippetAreaRepository,
-        private SnippetRepositoryInterface $snippetRepository,
-        private DomainEventCollectorInterface $domainEventCollector
-    ) {
-    }
-
-    public function __invoke(ModifySnippetAreaMessage $message): SnippetAreaInterface
-    {
-        $webspaceKey = $message->getWebspaceKey();
-        $areaKey = $message->getAreaKey();
-
-        $snippetArea = $this->snippetAreaRepository->findOneBy(['webspaceKey' => $webspaceKey, 'areaKey' => $areaKey]);
-        if (null === $snippetArea) {
-            $snippetArea = $this->snippetAreaRepository->createNew($areaKey, $webspaceKey);
-
-            $this->snippetAreaRepository->add($snippetArea);
-        }
-
-        $snippet = $this->snippetRepository->getOneBy($message->getSnippetIdentifier());
-        $snippetArea->setSnippet($snippet);
-
-        $this->domainEventCollector->collect(new SnippetAreaModifiedEvent($snippetArea, $message->getLocale(), $message->getData(), ['webspaceKey' => $webspaceKey]));
-
-        return $snippetArea;
-    }
 }

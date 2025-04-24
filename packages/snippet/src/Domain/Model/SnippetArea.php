@@ -15,31 +15,26 @@ namespace Sulu\Snippet\Domain\Model;
 
 use Symfony\Component\Uid\Uuid;
 
-class SnippetArea implements SnippetAreaInterface
+class SnippetArea
 {
-    protected string $uuid;
+    /**
+     * @var string
+     */
+    protected $uuid;
 
     private string $webspaceKey;
 
     private string $areaKey;
 
-    private ?SnippetInterface $snippet = null;
+    private Snippet $snippet;
 
     public function __construct(
-        string $areaKey,
-        string $webspaceKey,
-        ?string $uuid = null,
+        ?string $uuid = null
     ) {
         $this->uuid = $uuid ?: Uuid::v7()->__toString();
-
-        $this->areaKey = $areaKey;
-        $this->webspaceKey = $webspaceKey;
     }
 
-    /**
-     * @deprecated use getUuid
-     */
-    public function getId(): string
+    public function getId(): string // TODO should be replaced by uuid
     {
         return $this->uuid;
     }
@@ -49,11 +44,9 @@ class SnippetArea implements SnippetAreaInterface
         return $this->uuid;
     }
 
-    public function setWebspaceKey(string $webspaceKey): static
+    public function setWebspaceKey(string $webspaceKey): void
     {
         $this->webspaceKey = $webspaceKey;
-
-        return $this;
     }
 
     public function getWebspaceKey(): string
@@ -61,11 +54,9 @@ class SnippetArea implements SnippetAreaInterface
         return $this->webspaceKey;
     }
 
-    public function setAreaKey(string $areaKey): static
+    public function setAreaKey(string $areaKey): void
     {
         $this->areaKey = $areaKey;
-
-        return $this;
     }
 
     public function getAreaKey(): string
@@ -73,14 +64,12 @@ class SnippetArea implements SnippetAreaInterface
         return $this->areaKey;
     }
 
-    public function setSnippet(?SnippetInterface $snippet): static
+    public function setSnippet(Snippet $snippet): void
     {
         $this->snippet = $snippet;
-
-        return $this;
     }
 
-    public function getSnippet(): ?SnippetInterface
+    public function getSnippet(): Snippet
     {
         return $this->snippet;
     }
