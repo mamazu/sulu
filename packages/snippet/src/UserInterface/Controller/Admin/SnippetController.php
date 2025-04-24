@@ -210,7 +210,7 @@ final class SnippetController implements SecuredControllerInterface
 
     public function postAction(Request $request): Response
     {
-        $message = new SetSnippetMessage($this->getData($request));
+        $message = new CreateSnippetMessage($this->getData($request));
 
         /** @see \Sulu\Snippet\Application\MessageHandler\CreateSnippetMessageHandler */
         /** @var SnippetInterface $snippet */
