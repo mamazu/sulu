@@ -119,6 +119,7 @@
         "jackalope/jackalope-doctrine-dbal": "^1.6 || ^2.0",
         "jangregor/phpstan-prophecy": "^2.0",
         "league/flysystem-memory": "^3.29",
+        "mamazu/doctrine-performance": "*",
         "matthiasnoback/symfony-config-test": "^6.0",
         "matthiasnoback/symfony-dependency-injection-test": "^6.1",
         "monolog/monolog": "^1.26.1 || ^2.3 || ^3.0",
@@ -298,5 +299,12 @@
             "symfony/runtime": true,
             "php-http/discovery": true
         }
-    }
+    },
+    "repositories": [
+        {
+            "type": "path",
+            "url": "/home/mamazu/packages/mamazu/doctrine-performance"
+        }
+    ],
+    "minimum-stability": "dev"
 }
