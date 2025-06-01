@@ -209,7 +209,7 @@ final class SuluSnippetBundle extends AbstractBundle
 
         // Snippet area
         $services->set('sulu_snippet.modify_snippet_area_handler')
-            ->class(ModifySnippetMessageHandler::class)
+            ->class(ModifySnippetAreaMessageHandler::class)
             ->args([
                 new Reference('sulu_snippet.snippet_area_repository'),
             ])
