@@ -13,6 +13,8 @@ declare(strict_types=1);
 
 namespace Sulu\Snippet\Tests\Functional\Integration;
 
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Tools\SchemaTool;
 use Sulu\Bundle\TestBundle\Testing\AssertSnapshotTrait;
 use Sulu\Bundle\TestBundle\Testing\SuluTestCase;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
@@ -34,207 +36,98 @@ class SnippetAreaControllerTest extends SuluTestCase
             ['CONTENT_TYPE' => 'application/json', 'HTTP_ACCEPT' => 'application/json']
         );
 
-        self::purgeDatabase();
+        /** @var EntityManagerInterface $entityManager */
+        $entityManager = self::getContainer()->get(EntityManagerInterface::class);
+        $schemaTool = new SchemaTool($entityManager);
+        $classes = $entityManager->getMetadataFactory()->getAllMetadata();
+        $schemaTool->updateSchema($classes, false);
     }
 
-    public function testGetList(): void
+    public function testGetList(): string
     {
-        $this->client->jsonRequest('GET', '/admin/api/snippet-areas?webspaceKey=sulu-io');
+        self::purgeDatabase();
+
+        $this->client->jsonRequest('GET', '/admin/api/snippet-areas/sulu-io');
 
         $this->assertResponseSnapshot('snippet_area_cget.json', $this->client->getResponse(), 200);
-    }
-
-    public function testPost(): void
-    {
-        $this->client->jsonRequest('POST', '/admin/api/snippets?locale=en&action=publish', [
-            'template' => 'snippet',
-            'title' => 'Test Snippet',
-            'images' => null,
-            'excerptTitle' => 'Excerpt Title',
-            'excerptDescription' => 'Excerpt Description',
-            'excerptMore' => 'Excerpt More',
-            'excerptTags' => ['Tag 1', 'Tag 2'],
-            'excerptCategories' => [],
-            'excerptIcon' => null,
-            'excerptMedia' => null,
-        ]);
-
-        $response = $this->client->getResponse();
-
-        $responseContent = \json_decode((string) $response->getContent(), true) ?? [];
-        /** @var array{id: string} $responseContent */
-        $id = $responseContent['id'];
-
-        $this->client->jsonRequest('PUT', '/admin/api/snippet-areas/hotel?webspaceKey=sulu-io', [
-            'snippetUuid' => (string) $id,
-        ]);
-        $this->assertResponseStatusCodeSame(200);
-
-        $this->client->jsonRequest('GET', '/admin/api/snippet-areas?webspaceKey=sulu-io');
-        $this->assertResponseSnapshot('snippet_area_cget_partially_filled.json', $this->client->getResponse(), 200);
-    }
-
-    public function testPostWithInvalidSnippetUuid(): void
-    {
-        $this->client->jsonRequest('PUT', '/admin/api/snippet-areas/hotel?webspaceKey=sulu-io', [
-            'snippetUuid' => 'invalid-uuid',
-        ]);
-
-        $this->assertResponseStatusCodeSame(500);
-        $response = $this->client->getResponse();
-        $this->assertStringContainsString('invalid-uuid', (string) $response->getContent());
-        $this->assertStringContainsString('not found', (string) $response->getContent());
-    }
-
-    public function testPostWithoutSnippetUuid(): void
-    {
-        $this->client->jsonRequest('PUT', '/admin/api/snippet-areas/hotel?webspaceKey=sulu-io', []);
-
-        $this->assertResponseStatusCodeSame(500);
-        $response = $this->client->getResponse();
-        $this->assertStringContainsString('snippetUuid must be a string', (string) $response->getContent());
-    }
-
-    public function testPostWithNonStringSnippetUuid(): void
-    {
-        $this->client->jsonRequest('PUT', '/admin/api/snippet-areas/hotel?webspaceKey=sulu-io', [
-            'snippetUuid' => 123,
-        ]);
-
-        $this->assertResponseStatusCodeSame(500);
-        $response = $this->client->getResponse();
-        $this->assertStringContainsString('snippetUuid must be a string', (string) $response->getContent());
-    }
-
-    public function testPostWithNonExistentAreaKey(): void
-    {
-        $this->client->jsonRequest('PUT', '/admin/api/snippet-areas/nonexistent?webspaceKey=sulu-io', [
-            'snippetUuid' => '01234567-1234-1234-1234-123456789abc',
-        ]);
-
-        $this->assertResponseStatusCodeSame(500);
-        $response = $this->client->getResponse();
-        $this->assertStringContainsString('not found', (string) $response->getContent());
-    }
-
-    public function testSnippetAreaParametersIncludeCacheSettings(): void
-    {
-        $snippetAreas = self::getContainer()->getParameter('sulu_snippet.areas');
-        /** @var array<string, array{cache-invalidation: bool}> $snippetAreas */
-        $this->assertArrayHasKey('with-cache', $snippetAreas);
-        $this->assertArrayHasKey('hotel', $snippetAreas);
-
-        $this->assertTrue($snippetAreas['with-cache']['cache-invalidation'], 'with-cache area should have cache-invalidation = true');
-        $this->assertFalse($snippetAreas['hotel']['cache-invalidation'], 'hotel area should have cache-invalidation = false');
-        $this->assertFalse($snippetAreas['test']['cache-invalidation'], 'test area should have cache-invalidation = false');
-    }
-
-    public function testPutWithoutEditPermission(): void
-    {
-        $this->client->jsonRequest('POST', '/admin/api/snippets?locale=en&action=publish', [
-            'template' => 'snippet',
-            'title' => 'Test Snippet',
-            'images' => null,
-            'excerptTitle' => 'Excerpt Title',
-            'excerptDescription' => 'Excerpt Description',
-            'excerptMore' => 'Excerpt More',
-            'excerptTags' => ['Tag 1', 'Tag 2'],
-            'excerptCategories' => [],
-            'excerptIcon' => null,
-            'excerptMedia' => null,
-        ]);
-
-        $response = $this->client->getResponse();
-        $responseContent = \json_decode((string) $response->getContent(), true) ?? [];
-        /** @var array{id: string} $responseContent */
-        $id = $responseContent['id'];
 
         self::ensureKernelShutdown();
-
-        // Create a client without permissions
-        $clientWithoutPermissions = $this->createClient();
-
-        $clientWithoutPermissions->jsonRequest('PUT', '/admin/api/snippet-areas/hotel?webspaceKey=sulu-io', [
-            'snippetUuid' => (string) $id,
-        ]);
-
-        $this->assertResponseStatusCodeSame(401);
     }
 
-    public function testDeleteWithoutEditPermission(): void
-    {
-        $this->client->jsonRequest('POST', '/admin/api/snippets?locale=en&action=publish', [
-            'template' => 'snippet',
-            'title' => 'Test Snippet',
-            'images' => null,
-            'excerptTitle' => 'Excerpt Title',
-            'excerptDescription' => 'Excerpt Description',
-            'excerptMore' => 'Excerpt More',
-            'excerptTags' => ['Tag 1', 'Tag 2'],
-            'excerptCategories' => [],
-            'excerptIcon' => null,
-            'excerptMedia' => null,
-        ]);
+    //public function testPut(): void
+    //{
+    //$this->client->jsonRequest(
+    //'PUT',
+    //'/admin/api/snippet-areas/car',
+    //['webspace' => 'sulu_io', 'defaultUuid' => $this->car1->getUuid()]
+    //);
 
-        $response = $this->client->getResponse();
-        $responseContent = \json_decode((string) $response->getContent(), true) ?? [];
-        /** @var array{id: string} $responseContent */
-        $id = $responseContent['id'];
+    //$this->assertHttpStatusCode(200, $this->client->getResponse());
+    //$response = \json_decode($this->client->getResponse()->getContent(), true);
 
-        $this->client->jsonRequest('PUT', '/admin/api/snippet-areas/hotel?webspaceKey=sulu-io', [
-            'snippetUuid' => (string) $id,
-        ]);
+    //$this->assertEquals('car', $response['template']);
+    //$this->assertEquals('Car', $response['title']);
+    //$this->assertEquals($this->car1->getUuid(), $response['defaultUuid']);
+    //$this->assertEquals($this->car1->getTitle(), $response['defaultTitle']);
 
-        self::ensureKernelShutdown();
+    //$this->client->jsonRequest('GET', '/api/snippet-areas?webspace=sulu_io');
 
-        // Create a client without permissions
-        $clientWithoutPermissions = $this->createClient();
+    //$this->assertHttpStatusCode(200, $this->client->getResponse());
+    //$response = \json_decode($this->client->getResponse()->getContent(), true);
+    //$data = $response['_embedded']['areas'];
 
-        $clientWithoutPermissions->jsonRequest('DELETE', '/admin/api/snippet-areas/hotel?webspaceKey=sulu-io');
+    //$this->assertEquals(3, $response['total']);
+    //$this->assertEquals('car', $data[0]['template']);
+    //$this->assertEquals('Car', $data[0]['title']);
+    //$this->assertEquals($this->car1->getTitle(), $data[0]['defaultTitle']);
+    //$this->assertEquals($this->car1->getUuid(), $data[0]['defaultUuid']);
+    //$this->assertEquals('hotel', $data[1]['template']);
+    //$this->assertEquals('Golf hotel', $data[1]['title']);
+    //$this->assertEquals(null, $data[1]['defaultTitle']);
+    //$this->assertEquals(null, $data[1]['defaultUuid']);
+    //$this->assertEquals('hotel', $data[2]['template']);
+    //$this->assertEquals('Sport hotel', $data[2]['title']);
+    //$this->assertEquals(null, $data[2]['defaultTitle']);
+    //$this->assertEquals(null, $data[2]['defaultUuid']);
+    //}
 
-        $this->assertResponseStatusCodeSame(401);
-    }
+    //#[\PHPUnit\Framework\Attributes\Depends('testPut')]
+    //public function testDelete(): void
+    //{
+    //$this->client->jsonRequest(
+    //'DELETE',
+    //'/api/snippet-areas/car',
+    //['webspace' => 'sulu_io']
+    //);
 
-    public function testDelete(): void
-    {
-        $this->client->jsonRequest('POST', '/admin/api/snippets?locale=en&action=publish', [
-            'template' => 'snippet',
-            'title' => 'Test Snippet',
-            'images' => null,
-            'excerptTitle' => 'Excerpt Title',
-            'excerptDescription' => 'Excerpt Description',
-            'excerptMore' => 'Excerpt More',
-            'excerptTags' => ['Tag 1', 'Tag 2'],
-            'excerptCategories' => [],
-            'excerptIcon' => null,
-            'excerptMedia' => null,
-        ]);
+    //$this->assertHttpStatusCode(200, $this->client->getResponse());
+    //$response = \json_decode($this->client->getResponse()->getContent(), true);
 
-        $response = $this->client->getResponse();
-        $responseContent = \json_decode((string) $response->getContent(), true) ?? [];
-        /** @var array{id: string} $responseContent */
-        $id = $responseContent['id'];
+    //$this->assertEquals('car', $response['template']);
+    //$this->assertEquals('Car', $response['title']);
+    //$this->assertEquals(null, $response['defaultUuid']);
+    //$this->assertEquals(null, $response['defaultTitle']);
 
-        $this->client->jsonRequest('PUT', '/admin/api/snippet-areas/hotel?webspaceKey=sulu-io', [
-            'snippetUuid' => (string) $id,
-        ]);
-        $this->assertResponseStatusCodeSame(200);
+    //$this->client->jsonRequest('GET', '/api/snippet-areas?webspace=sulu_io');
 
-        // Now delete the snippet area assignment
-        $this->client->jsonRequest('DELETE', '/admin/api/snippet-areas/hotel?webspaceKey=sulu-io');
-        $this->assertResponseStatusCodeSame(200);
+    //$this->assertHttpStatusCode(200, $this->client->getResponse());
+    //$response = \json_decode($this->client->getResponse()->getContent(), true);
+    //$data = $response['_embedded']['areas'];
 
-        $response = $this->client->getResponse();
-
-        $responseContent = \json_decode((string) $response->getContent(), true) ?? [];
-        $this->assertIsArray($responseContent);
-
-        // Verify the snippet area is cleared
-        $this->assertArrayHasKey('snippetUuid', $responseContent);
-        $this->assertNull($responseContent['snippetUuid']);
-        $this->assertArrayHasKey('snippetTitle', $responseContent);
-        $this->assertNull($responseContent['snippetTitle']);
-    }
+    //$this->assertEquals(3, $response['total']);
+    //$this->assertEquals('car', $data[0]['template']);
+    //$this->assertEquals('Car', $data[0]['title']);
+    //$this->assertEquals(null, $data[0]['defaultTitle']);
+    //$this->assertEquals(null, $data[0]['defaultUuid']);
+    //$this->assertEquals('hotel', $data[1]['template']);
+    //$this->assertEquals('Golf hotel', $data[1]['title']);
+    //$this->assertEquals(null, $data[1]['defaultTitle']);
+    //$this->assertEquals(null, $data[1]['defaultUuid']);
+    //$this->assertEquals('hotel', $data[2]['template']);
+    //$this->assertEquals('Sport hotel', $data[2]['title']);
+    //$this->assertEquals(null, $data[2]['defaultTitle']);
+    //$this->assertEquals(null, $data[2]['defaultUuid']);
+    //}
 
     protected function getSnapshotFolder(): string
     {

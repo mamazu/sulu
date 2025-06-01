@@ -36,7 +36,7 @@ sulu_snippet.post_snippet_trigger:
 
 # Snippet areas
 sulu_snippet_area.get_snippet_areas:
-    path: /snippets_areas/{webspace}
+    path: /snippet-areas/{webspace}
     methods: GET
     controller: sulu_snippet.admin_snippet_area_controller::cgetAction
     format: json
