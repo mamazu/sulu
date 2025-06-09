@@ -25,7 +25,8 @@
         "docs": "https://docs.sulu.io/"
     },
     "require": {
-        "php": "^8.2 || ^8.3 || ^8.4 || ^8.5",
+        "friendsofsulu/sulu-attributes-bundle": "dev-main as 1.0",
+        "php": "^8.2 || ^8.3",
         "ext-dom": "*",
         "ext-fileinfo": "*",
         "ext-filter": "*",
@@ -299,5 +300,12 @@
             "symfony/runtime": true,
             "php-http/discovery": true
         }
-    }
+    },
+    "repositories": [
+        {
+            "type": "path",
+            "url": "/home/mamazu/packages/friendsofsulu/SuluAttributesBundle",
+            "symlink": true
+        }
+    ]
 }
