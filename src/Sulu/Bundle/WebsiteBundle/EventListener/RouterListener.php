@@ -17,6 +17,7 @@ use Symfony\Component\HttpKernel\Event\FinishRequestEvent;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\EventListener\RouterListener as BaseRouterListener;
 use Symfony\Component\HttpKernel\KernelEvents;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * This listener replaces the default RouterListener delivered by Symfony and adds the analyzing of the request as

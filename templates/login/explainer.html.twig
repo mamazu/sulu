@@ -1,0 +1,25 @@
+{% extends "base.html.twig" %}
+
+{% block content %}
+    <h2>Simple login form</h2>
+If you have a simple login on your website activate the following routes to your <pre style="display: inline">config/routes_website.yaml</pre>
+
+    <pre style="padding: 1rem;background-color: rgba(0, 0, 0, .05)">
+login:
+    path: /login
+    controller:   Symfony\Bundle\FrameworkBundle\Controller\TemplateController
+    defaults:
+        # the following template need to be created:
+        # see https://github.com/sulu/sulu/blob/2.x/templates/static/login.html.twig as example
+        template: login/login.html.twig
+
+logout:
+    path: /logout
+    </pre>
+
+    <h2>Full user profile management</h2>
+<p>
+ If you need registration or profile edit have a look at the:
+    <a target="_blank" href="https://github.com/sulu/SuluCommunityBundle">SuluCommunityBundle</a>
+</p>
+{% endblock %}

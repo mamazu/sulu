@@ -12,9 +12,14 @@
 namespace Sulu\Bundle\WebsiteBundle;
 
 use Sulu\Bundle\PersistenceBundle\PersistenceBundleTrait;
+use Sulu\Bundle\WebsiteBundle\Command\DumpServiceGraph;
 use Sulu\Bundle\WebsiteBundle\DependencyInjection\Compiler\DeregisterDefaultRouteListenerCompilerPass;
+use Sulu\Bundle\WebsiteBundle\DependencyInjection\Compiler\RegisterDebugKernelListener;
 use Sulu\Bundle\WebsiteBundle\Entity\AnalyticsInterface;
+use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Definition;
+use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
 final class SuluWebsiteBundle extends Bundle
@@ -29,6 +34,8 @@ final class SuluWebsiteBundle extends Bundle
         parent::build($container);
 
         $container->addCompilerPass(new DeregisterDefaultRouteListenerCompilerPass());
+        $container->addCompilerPass(new RegisterDebugKernelListener());
+        $container->addCompilerPass(new DumpStuff(), type: PassConfig::TYPE_AFTER_REMOVING);
 
         $this->buildPersistence(
             [

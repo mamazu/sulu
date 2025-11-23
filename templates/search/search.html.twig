@@ -3,6 +3,10 @@
 {% block content %}
     <h2>Showing {{ hits|length }} results for "{{ query }}"</h2>
 
+    <div style="background: #d5ffff; padding: 1px; line-height: 150%">
+        How to configure the search bundle: <a target="_blank" href="https://docs.sulu.io/en/2.0/bundles/search.html">Docs</a>
+    </div>
+
     <ul>
         {% for i, hit in hits %}
             <li>

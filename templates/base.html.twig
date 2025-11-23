@@ -16,10 +16,10 @@
 
     {% block style %}{% endblock %}
 </head>
-<body>
-    <header>
+<body style="margin: 0px; padding: 0px">
+    <header style="border-bottom: 1px solid silver">
         {% block header %}
-            <nav>
+            <nav style="display: flex; align-items: center; justify-content: space-between">
                 <ul>
                     <li>
                         <a href="{{ sulu_content_root_path() }}">Homepage</a>
@@ -33,13 +33,20 @@
                     {% endfor %}
                 </ul>
 
-                <ul>
+                <div style="display: flex">
                     {% for localization in localizations|default([]) %}
-                        <li>
+                        <span style="border-right: 1px solid silver; padding: .25rem .5rem">
                             <a href="{{ localization.url }}">{{ localization.locale }}</a>
-                        </li>
+                        </span>
                     {% endfor %}
-                </ul>
+                    <a href="https://docs.sulu.io/en/2.5/book/localization.html" target="_blank" style="padding: .25rem .5rem">
+                        More languages?
+                    </a>
+                </div>
+
+                <a href="{{ path('login_explainer') }}">
+                    <button>Login</button>
+                </a>
             </nav>
 
             <nav>
@@ -54,22 +61,16 @@
         {% endblock %}
     </header>
 
-    {# Todo: reimplement search form
-    <form action="{{ path('sulu_search.website_search') }}" method="GET">
+    <form action="{{ path('sulu_search.website_search') }}" method="GET" style="padding: 1rem;">
         <input name="q" type="text" placeholder="Search"/>
         <input type="submit" value="Go"/>
     </form>
-    #}
 
-    <section id="content" vocab="http://schema.org/" typeof="Content">
+    <main id="content" vocab="http://schema.org/" typeof="Content" style="width: 80%; margin: auto;">
         {% block content %}{% endblock %}
-    </section>
+    </main>
 
-    <aside>
-        {% block aside %}{% endblock %}
-    </aside>
-
-    <footer>
+    <footer style="text-align: center">
         {% block footer %}
             <p>Copyright {{ 'now'|date('Y') }} SULU</p>
         {% endblock %}

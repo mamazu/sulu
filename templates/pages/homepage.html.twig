@@ -1,6 +1,15 @@
 {% extends "base.html.twig" %}
 
 {% block content %}
+    <div style="background: #d5ffff; padding: 1px; line-height: 150%">
+        Customize Webspace: config/webspaces/{{ resource.webspaceKey}}.xml
+        (<a target="_blank" href="https://docs.sulu.io/en/2.5/book/webspaces.html">Docs</a>)
+        <br />
+        Customize Template: templates/pages/homepage.html.twig
+        <br />
+        Configure Content: <a href="/admin">Admin Panel</a>
+    </div>
+
     <h1>{{ content.title }}</h1>
 
     <ul>
@@ -14,4 +23,8 @@
     {% for media in content.media %}
         <img src="{{ media.thumbnails['sulu-260x'] }}" />
     {% endfor %}
+
+    <div>
+        Authored by: {{ content.contacts[0].fullName|default() }}
+    </div>
 {% endblock %}
