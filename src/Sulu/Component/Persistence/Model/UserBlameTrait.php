@@ -11,6 +11,7 @@
 
 namespace Sulu\Component\Persistence\Model;
 
+use FriendsOfSulu\Bundle\SuluAttributesBundle\Attributes\ListConfiguration\ConcatPropertyMetadata;
 use Sulu\Component\Security\Authentication\UserInterface;
 
 /**
@@ -18,6 +19,7 @@ use Sulu\Component\Security\Authentication\UserInterface;
  */
 trait UserBlameTrait
 {
+    #[ConcatPropertyMetadata]
     protected ?UserInterface $creator = null;
 
     protected ?UserInterface $changer = null;

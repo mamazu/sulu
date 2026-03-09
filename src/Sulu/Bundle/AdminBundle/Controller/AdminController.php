@@ -25,6 +25,7 @@ use Sulu\Bundle\AdminBundle\SmartContent\SmartContentProviderInterface;
 use Sulu\Bundle\ContactBundle\Contact\ContactManagerInterface;
 use Sulu\Bundle\MarkupBundle\Markup\Link\LinkProviderPoolInterface;
 use Sulu\Component\Localization\Manager\LocalizationManagerInterface;
+use Sulu\Snippet\Domain\Model\Snippet;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -185,6 +186,9 @@ class AdminController
     {
         $user = $this->tokenStorage->getToken()->getUser();
         $locale = $user->getLocale();
+        if ($key === 'snippets') {
+            $key = Snippet::class;
+        }
 
         $metadataOptions = $request->query->all();
         $metadata = $this->metadataProviderRegistry->getMetadataProvider($type)

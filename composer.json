@@ -154,7 +154,8 @@
         "symfony/runtime": "^6.4 || ^7.1",
         "symfony/stopwatch": "^6.4 || ^7.1",
         "symfony/var-dumper": "^6.4 || ^7.1",
-        "symfony/web-profiler-bundle": "^6.4 || ^7.1"
+        "symfony/web-profiler-bundle": "^6.4 || ^7.1",
+        "friendsofsulu/sulu-attributes-bundle": "dev-main as 1.0"
     },
     "conflict": {
         "doctrine/doctrine-bundle": "2.13.1 || 2.13.x-dev || 2.14.x-dev",
@@ -299,5 +300,11 @@
             "symfony/runtime": true,
             "php-http/discovery": true
         }
-    }
+    },
+    "repositories": [
+        {
+            "type": "path",
+            "url": "/Users/max.pesch/packages/sulu/SuluAttributesBundle"
+        }
+    ]
 }
