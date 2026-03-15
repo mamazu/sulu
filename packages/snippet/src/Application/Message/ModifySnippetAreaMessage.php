@@ -13,28 +13,35 @@ declare(strict_types=1);
 
 namespace Sulu\Snippet\Application\Message;
 
+/** @phpstan-type ModifySnippetAreaMessageData array{
+ *     webspaceKey: string,
+ *     areaKey: string,
+ *     snippetIdentifier: array{uuid: string},
+ *     locale: string,
+ *  }
+ */
 class ModifySnippetAreaMessage
 {
-    private string $webspace;
+    private string $webspaceKey;
     private string $areaKey;
+    private string $locale;
+    /** @var array{ uuid: string } */
+    private array $snippetIdentifier;
 
     /**
-     * @var array{ uuid: string } */
-    private array $snippet;
-
-    /**
-     * @param array<string,string> $requestData
+     * @param ModifySnippetAreaMessageData $data
      */
-    public function __construct(array $requestData)
+    public function __construct(array $data)
     {
-        $this->webspace = $requestData['webspace'];
-        $this->areaKey = $requestData['key'];
-        $this->snippet = $requestData['snippet'];
+        $this->webspaceKey = $data['webspaceKey'];
+        $this->areaKey = $data['areaKey'];
+        $this->snippetIdentifier = $data['snippetIdentifier'];
+        $this->locale = $data['locale'];
     }
 
-    public function getWebspace(): string
+    public function getWebspaceKey(): string
     {
-        return $this->webspace;
+        return $this->webspaceKey;
     }
 
     public function getAreaKey(): string
@@ -42,8 +49,27 @@ class ModifySnippetAreaMessage
         return $this->areaKey;
     }
 
-    public function getSnippet(): array
+    /**
+     * @return array{ uuid: string }
+     */
+    public function getSnippetIdentifier(): array
     {
-        return $this->snippet;
+        return $this->snippetIdentifier;
+    }
+
+    public function getLocale(): string
+    {
+        return $this->locale;
+    }
+
+    /** @return ModifySnippetAreaMessageData */
+    public function getData(): array
+    {
+        return [
+            'webspaceKey' => $this->webspaceKey,
+            'snippetIdentifier' => $this->snippetIdentifier,
+            'areaKey' => $this->areaKey,
+            'locale' => $this->locale,
+        ];
     }
 }

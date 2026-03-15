@@ -21,7 +21,7 @@
     "sulu_snippet.snippet_area": "Bereich",
     "sulu_snippet.taxonomies": "Taxonomien",
     "sulu_snippet.webspace_default_snippets": "Standard Schnipsel",
-    "sulu_snippet.single_snippet_selection_overlay_title": "Snippet auswählen",
+    "sulu_snippet.single_snippet_selection_overlay_title": "Schnipsel auswählen",
     "sulu_activity.resource.snippets": "Schnipsel",
     "sulu_activity.resource.snippets.translation": "Übersetzung",
     "sulu_activity.description.snippets.created": "{userFullName} hat den Schnipsel \"{resourceTitle}\" erstellt",
