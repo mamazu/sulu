@@ -27,12 +27,12 @@ trait ContentRichEntityTrait
      * @var Collection<int, T>&iterable<int, T>
      */
     #[JoinMetadata(
-        'dimensionContent',
-        '(this).dimensionContents',
+        'dimensionContents',
+        'content',
         joinMethod: 'LEFT',
-        joinCondition: "dimensionContent.locale = :locale AND dimensionContent.stage = 'draft' AND dimensionContent.version = 0"
+        joinCondition: "content.locale = :locale AND content.stage = 'draft' AND content.version = 0"
     )]
-    #[OtherMetadata(otherClassName: \Sulu\Snippet\Domain\Model\SnippetDimensionContent::class, entityAlias: 'dimensionContent')]
+    #[OtherMetadata(otherClassName: \Sulu\Snippet\Domain\Model\SnippetDimensionContent::class, entityAlias: 'content')]
     protected $dimensionContents;
 
     /**
