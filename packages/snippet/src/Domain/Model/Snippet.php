@@ -11,11 +11,11 @@
 
 namespace Sulu\Snippet\Domain\Model;
 
+use FriendsOfSulu\Bundle\SuluAttributesBundle\Attributes\ListConfiguration\SinglePropertyMetadata;
 use Sulu\Component\Persistence\Model\AuditableTrait;
 use Sulu\Content\Domain\Model\ContentRichEntityTrait;
 use Sulu\Content\Domain\Model\DimensionContentInterface;
 use Symfony\Component\Uid\Uuid;
-use FriendsOfSulu\Bundle\SuluAttributesBundle\Attributes\ListConfiguration\SinglePropertyMetadata;
 
 class Snippet implements SnippetInterface
 {

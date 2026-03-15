@@ -187,7 +187,7 @@ class AdminController
         $user = $this->tokenStorage->getToken()->getUser();
         $locale = $user->getLocale();
 
-        if ($key === 'snippets') {
+        if ('snippets' === $key) {
             $key = Snippet::class;
         }
 

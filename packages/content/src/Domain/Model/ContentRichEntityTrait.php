@@ -26,7 +26,6 @@ trait ContentRichEntityTrait
     /**
      * @var Collection<int, T>&iterable<int, T>
      */
-
     #[JoinMetadata(
         'dimensionContent',
         '(this).dimensionContents',

@@ -11,9 +11,9 @@
 
 namespace Sulu\Component\Persistence\Model;
 
-use Sulu\Component\Security\Authentication\UserInterface;
 use FriendsOfSulu\Bundle\SuluAttributesBundle\Attributes\ListConfiguration\ConcatPropertyMetadata;
 use FriendsOfSulu\Bundle\SuluAttributesBundle\Attributes\ListConfiguration\JoinMetadata;
+use Sulu\Component\Security\Authentication\UserInterface;
 
 /**
  * Trait with basic implementation of UserBlameInterface.
@@ -21,19 +21,19 @@ use FriendsOfSulu\Bundle\SuluAttributesBundle\Attributes\ListConfiguration\JoinM
 trait UserBlameTrait
 {
     #[ConcatPropertyMetadata(fields: [
-        ['firstName', 'le_creator'],
-        ['lastName', 'le_creator'],
+        'le_creator.firstName',
+        'le_creator.lastName',
     ], glue: ' ')]
-    #[JoinMetadata('creatorUser', '(this).creator')]
-    #[JoinMetadata('le_creator', 'creatorUser.contact')]
+    #[JoinMetadata('creator', 'creatorUser')]
+    #[JoinMetadata('creatorUser.contact', 'le_creator')]
     protected ?UserInterface $creator = null;
 
     #[ConcatPropertyMetadata(fields: [
-        ['firstName', 'le_changer'],
-        ['lastName', 'le_changer'],
+        'le_changer.firstName',
+        'le_changer.lastName',
     ], glue: ' ')]
-    #[JoinMetadata('changerUser', '(this).changer')]
-    #[JoinMetadata('le_changer', 'changerUser.contact')]
+    #[JoinMetadata('changer', 'changerUser')]
+    #[JoinMetadata('changerUser.contact', 'le_changer')]
     protected ?UserInterface $changer = null;
 
     /**
