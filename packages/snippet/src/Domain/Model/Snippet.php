@@ -15,6 +15,7 @@ use Sulu\Component\Persistence\Model\AuditableTrait;
 use Sulu\Content\Domain\Model\ContentRichEntityTrait;
 use Sulu\Content\Domain\Model\DimensionContentInterface;
 use Symfony\Component\Uid\Uuid;
+use FriendsOfSulu\Bundle\SuluAttributesBundle\Attributes\ListConfiguration\SinglePropertyMetadata;
 
 class Snippet implements SnippetInterface
 {
@@ -24,6 +25,7 @@ class Snippet implements SnippetInterface
     use ContentRichEntityTrait;
     use AuditableTrait;
 
+    #[SinglePropertyMetadata(name: 'id', fieldName: 'uuid', title: 'sulu_admin.id')]
     protected string $uuid;
 
     public function __construct(

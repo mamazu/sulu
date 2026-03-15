@@ -11,6 +11,7 @@
 
 namespace Sulu\Component\Persistence\Model;
 
+use FriendsOfSulu\Bundle\SuluAttributesBundle\Attributes\ListConfiguration\SinglePropertyMetadata;
 /**
  * Trait with basic implementation for the TimestampableInterface.
  *
@@ -18,8 +19,10 @@ namespace Sulu\Component\Persistence\Model;
  */
 trait TimestampableTrait
 {
+    #[SinglePropertyMetadata]
     protected \DateTimeImmutable $created;
 
+    #[SinglePropertyMetadata]
     protected \DateTimeImmutable $changed;
 
     /**

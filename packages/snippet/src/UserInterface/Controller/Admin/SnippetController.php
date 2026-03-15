@@ -31,6 +31,7 @@ use Sulu\Snippet\Application\Message\RemoveSnippetMessage;
 use Sulu\Snippet\Application\Message\RemoveSnippetTranslationMessage;
 use Sulu\Snippet\Application\Message\RestoreSnippetVersionMessage;
 use Sulu\Snippet\Domain\Exception\SnippetNotFoundException;
+use Sulu\Snippet\Domain\Model\Snippet;
 use Sulu\Snippet\Domain\Model\SnippetInterface;
 use Sulu\Snippet\Domain\Repository\SnippetRepositoryInterface;
 use Sulu\Snippet\Infrastructure\Sulu\Admin\SnippetAdmin;
@@ -74,11 +75,10 @@ final class SnippetController implements SecuredControllerInterface
     {
         // TODO this should be SnippetRepository::findFlatBy / ::countFlatBy methods
         //      but first we would need to avoid that the restHelper requires the request.
-        //
         /** @var DoctrineFieldDescriptorInterface[] $fieldDescriptors */
-        $fieldDescriptors = $this->fieldDescriptorFactory->getFieldDescriptors(SnippetInterface::RESOURCE_KEY);
+        $fieldDescriptors = $this->fieldDescriptorFactory->getFieldDescriptors(Snippet::class);
         /** @var DoctrineListBuilder $listBuilder */
-        $listBuilder = $this->listBuilderFactory->create(SnippetInterface::class);
+        $listBuilder = $this->listBuilderFactory->create(Snippet::class);
         $this->restHelper->initializeListBuilder($listBuilder, $fieldDescriptors);
         $listBuilder->setIdField($fieldDescriptors['id']); // TODO should be uuid field descriptor
         $listBuilder->addSelectField($fieldDescriptors['locale']);

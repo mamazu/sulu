@@ -15,6 +15,8 @@ namespace Sulu\Content\Domain\Model;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use FriendsOfSulu\Bundle\SuluAttributesBundle\Attributes\ListConfiguration\JoinMetadata;
+use FriendsOfSulu\Bundle\SuluAttributesBundle\Attributes\ListConfiguration\OtherMetadata;
 
 /**
  * @template T of DimensionContentInterface
@@ -24,6 +26,14 @@ trait ContentRichEntityTrait
     /**
      * @var Collection<int, T>&iterable<int, T>
      */
+
+    #[JoinMetadata(
+        'dimensionContent',
+        '(this).dimensionContents',
+        joinMethod: 'LEFT',
+        joinCondition: "dimensionContent.locale = :locale AND dimensionContent.stage = 'draft' AND dimensionContent.version = 0"
+    )]
+    #[OtherMetadata(otherClassName: \Sulu\Snippet\Domain\Model\SnippetDimensionContent::class, entityAlias: 'dimensionContent')]
     protected $dimensionContents;
 
     /**

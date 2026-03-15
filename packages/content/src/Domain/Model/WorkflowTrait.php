@@ -13,10 +13,14 @@ declare(strict_types=1);
 
 namespace Sulu\Content\Domain\Model;
 
+use FriendsOfSulu\Bundle\SuluAttributesBundle\Attributes\ListConfiguration\SinglePropertyMetadata;
+
 trait WorkflowTrait
 {
+    #[SinglePropertyMetadata(name: 'publishedState', title: 'sulu_content.published_state')]
     protected ?string $workflowPlace = null;
 
+    #[SinglePropertyMetadata(name: 'published', title: 'sulu_admin.published')]
     protected ?\DateTimeImmutable $workflowPublished = null;
 
     public static function getWorkflowName(): string

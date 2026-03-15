@@ -12,14 +12,28 @@
 namespace Sulu\Component\Persistence\Model;
 
 use Sulu\Component\Security\Authentication\UserInterface;
+use FriendsOfSulu\Bundle\SuluAttributesBundle\Attributes\ListConfiguration\ConcatPropertyMetadata;
+use FriendsOfSulu\Bundle\SuluAttributesBundle\Attributes\ListConfiguration\JoinMetadata;
 
 /**
  * Trait with basic implementation of UserBlameInterface.
  */
 trait UserBlameTrait
 {
+    #[ConcatPropertyMetadata(fields: [
+        ['firstName', 'le_creator'],
+        ['lastName', 'le_creator'],
+    ], glue: ' ')]
+    #[JoinMetadata('creatorUser', '(this).creator')]
+    #[JoinMetadata('le_creator', 'creatorUser.contact')]
     protected ?UserInterface $creator = null;
 
+    #[ConcatPropertyMetadata(fields: [
+        ['firstName', 'le_changer'],
+        ['lastName', 'le_changer'],
+    ], glue: ' ')]
+    #[JoinMetadata('changerUser', '(this).changer')]
+    #[JoinMetadata('le_changer', 'changerUser.contact')]
     protected ?UserInterface $changer = null;
 
     /**

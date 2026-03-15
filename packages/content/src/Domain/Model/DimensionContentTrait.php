@@ -13,10 +13,14 @@ declare(strict_types=1);
 
 namespace Sulu\Content\Domain\Model;
 
+use FriendsOfSulu\Bundle\SuluAttributesBundle\Attributes\ListConfiguration\SinglePropertyMetadata;
+
 trait DimensionContentTrait
 {
+    #[SinglePropertyMetadata]
     protected ?string $locale = null;
 
+    #[SinglePropertyMetadata]
     protected ?string $ghostLocale = null;
 
     /**
@@ -24,6 +28,7 @@ trait DimensionContentTrait
      */
     protected ?array $availableLocales = null;
 
+    #[SinglePropertyMetadata]
     protected string $stage = DimensionContentInterface::STAGE_DRAFT;
 
     private bool $isMerged = false;

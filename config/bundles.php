@@ -8,7 +8,6 @@
  * This source file is subject to the MIT license that is bundled
  * with this source code in the file LICENSE.
  */
-
 return [
     Symfony\Bundle\FrameworkBundle\FrameworkBundle::class => ['all' => true],
     Symfony\Bundle\TwigBundle\TwigBundle::class => ['all' => true],
@@ -56,5 +55,10 @@ return [
     Sulu\Snippet\Infrastructure\Symfony\HttpKernel\SuluSnippetBundle::class => ['all' => true],
     Sulu\Search\Infrastructure\Symfony\HttpKernel\SuluSearchBundle::class => ['all' => true],
     Sulu\Page\Infrastructure\Symfony\HttpKernel\SuluPageBundle::class => ['all' => true],
+<<<<<<< Updated upstream
     FriendsOfSulu\Bundle\SuluAttributesBundle\SuluAttributesBundle::class => ['all' => true],
+||||||| Stash base
+=======
+    FriendsOfSulu\Bundle\SuluAttributesBundle\SuluAttributesBundle::class => ['all' => true]
+>>>>>>> Stashed changes
 ];
