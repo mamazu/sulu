@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Sulu\Page\Infrastructure\Symfony\HttpKernel;
 
+use Doctrine\ORM\EntityManagerInterface;
 use Sulu\Bundle\PersistenceBundle\DependencyInjection\PersistenceExtensionTrait;
 use Sulu\Bundle\PersistenceBundle\PersistenceBundleTrait;
 use Sulu\Content\Infrastructure\Sulu\Preview\ContentObjectProvider;
@@ -91,6 +92,7 @@ use Sulu\Page\Infrastructure\Symfony\Twig\Extension\ContentPathTwigExtension;
 use Sulu\Page\Infrastructure\Symfony\Twig\Extension\NavigationTwigExtension;
 use Sulu\Page\Infrastructure\Symfony\Twig\Extension\PageTwigExtension;
 use Sulu\Page\UserInterface\Command\InitializeHomepageCommand;
+use Sulu\Page\UserInterface\Command\MassiveArticles;
 use Sulu\Page\UserInterface\Controller\Admin\PageController;
 use Symfony\Component\Config\Definition\Configurator\DefinitionConfigurator;
 use Symfony\Component\DependencyInjection\Compiler\PassConfig;
@@ -410,6 +412,15 @@ final class SuluPageBundle extends AbstractBundle
             ->args([
                 new Reference('sulu_core.webspace.webspace_manager'),
                 new Reference('sulu_page.page_repository'),
+                new Reference('sulu_message_bus'),
+            ])
+            ->tag('console.command');
+
+        $services->set(MassiveArticles::class)
+            ->args([
+                new Reference('sulu_core.webspace.webspace_manager'),
+                new Reference('sulu_page.page_repository'),
+                new Reference(EntityManagerInterface::class),
                 new Reference('sulu_message_bus'),
             ])
             ->tag('console.command');
