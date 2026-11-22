@@ -2,6 +2,15 @@
 
 declare(strict_types=1);
 
+/*
+ * This file is part of Sulu.
+ *
+ * (c) Sulu GmbH
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
+ */
+
 namespace Sulu\Page\UserInterface\Command;
 
 use Doctrine\ORM\EntityManagerInterface;
@@ -9,9 +18,9 @@ use Sulu\Component\Webspace\Manager\WebspaceManagerInterface;
 use Sulu\Component\Webspace\Webspace;
 use Sulu\Content\Domain\Model\WorkflowInterface;
 use Sulu\Messenger\Infrastructure\Symfony\Messenger\FlushMiddleware\EnableFlushStamp;
-use Sulu\Page\Application\MessageHandler\CreatePageMessageHandler;
 use Sulu\Page\Application\Message\ApplyWorkflowTransitionPageMessage;
 use Sulu\Page\Application\Message\CreatePageMessage;
+use Sulu\Page\Application\MessageHandler\CreatePageMessageHandler;
 use Sulu\Page\Domain\Model\PageInterface;
 use Sulu\Page\Domain\Repository\PageRepositoryInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -20,8 +29,8 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Messenger\Envelope;
-use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\HandleTrait;
+use Symfony\Component\Messenger\MessageBusInterface;
 
 #[AsCommand('sulu:articles')]
 class MassiveArticles extends Command
@@ -55,17 +64,16 @@ class MassiveArticles extends Command
         return Command::SUCCESS;
     }
 
-
     private function createPage(Webspace $webspace, string $locale): PageInterface
     {
         $webspaceKey = $webspace->getKey();
 
-        for ($i = 3; $i < 10_000; $i++) {
+        for ($i = 3; $i < 10_000; ++$i) {
             $data = [
-                'title' => $webspace->getName().' '.$i,
+                'title' => $webspace->getName() . ' ' . $i,
                 'template' => $webspace->getDefaultTemplate('page'),
                 'locale' => $locale,
-                'url' => '/test-'.$i,
+                'url' => '/test-' . $i,
             ];
 
             $message = new CreatePageMessage($webspaceKey, CreatePageMessageHandler::HOMEPAGE_PARENT_ID, $data);
@@ -82,10 +90,9 @@ class MassiveArticles extends Command
 
             /** @see ApplyWorkflowTransitionPageMessageHandler */
             $this->handle(new Envelope($message));
-            if ($i % 1000 === 0) {
-                echo 'Batch done'.PHP_EOL;
+            if (0 === $i % 1000) {
+                echo 'Batch done' . \PHP_EOL;
             }
         }
     }
-
 }

@@ -11,6 +11,8 @@
 
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
+use Sulu\Bundle\TagBundle\DataFixtures\ORM\LoadTags;
+
 return static function(ContainerConfigurator $container) {
     $services = $container->services();
     $parameters = $container->parameters();
@@ -61,4 +63,7 @@ return static function(ContainerConfigurator $container) {
             '%sulu.model.tag.class%',
         ])
         ->tag('sulu.context', ['context' => 'admin']);
+
+    $services->set(LoadTags::class)
+        ->tag('doctrine.fixture.orm');
 };

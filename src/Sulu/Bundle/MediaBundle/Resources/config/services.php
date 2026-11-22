@@ -26,6 +26,7 @@ use Sulu\Bundle\MediaBundle\Controller\MediaPreviewController;
 use Sulu\Bundle\MediaBundle\Controller\MediaRedirectController;
 use Sulu\Bundle\MediaBundle\Controller\MediaStreamController;
 use Sulu\Bundle\MediaBundle\DataFixtures\ORM\LoadCollectionTypes;
+use Sulu\Bundle\MediaBundle\DataFixtures\ORM\LoadMedia;
 use Sulu\Bundle\MediaBundle\Domain\Event\CollectionCreatedEvent;
 use Sulu\Bundle\MediaBundle\Domain\Event\CollectionModifiedEvent;
 use Sulu\Bundle\MediaBundle\Domain\Event\CollectionRemovedEvent;
@@ -478,6 +479,12 @@ return static function(ContainerConfigurator $container) {
         ->tag('console.command');
 
     $services->set('sulu_media.fixtures.collection_types', LoadCollectionTypes::class)
+        ->tag('doctrine.fixture.orm');
+
+    $services->set('sulu_media.fixtures.media', LoadMedia::class)
+        ->args([
+            new Reference('sulu_media.storage'),
+        ])
         ->tag('doctrine.fixture.orm');
 
     $services->set('sulu_media.field_metadata_validator.image_map', ImageMapFieldMetadataValidator::class)
